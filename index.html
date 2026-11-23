@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LogiFleet — Logistica &amp; Conto Lavoro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand-primary: #0F172A;
+      --brand-accent: #2563EB;
+      --bg-app: #F8FAFC;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-app);
+      color: #1E293B;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .app-card {
+      background-color: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 1rem;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    }
+    .btn-primary {
+      background-color: var(--brand-primary);
+      color: #FFFFFF;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.15);
+    }
+    .btn-accent {
+      background-color: var(--brand-accent);
+      color: #FFFFFF;
+    }
+    .btn-accent:hover {
+      filter: brightness(1.08);
+    }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #FFFFFF !important; }
+      .app-card { box-shadow: none !important; border: 1px solid #CBD5E1 !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+  <!-- ===================================================================== -->
+  <!-- HEADER STICKY SU 3 FASCE ANTI-SOVRAPPOSIZIONE                         -->
+  <!-- ===================================================================== -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 no-print">
+    <!-- FASCIA 1: Brand (Logo + Nome intero senza troncamenti + Badge stato + Sottotitolo) e Azioni -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+      <div class="flex items-start sm:items-center gap-3 w-full lg:w-auto min-w-0 flex-1">
+        <div id="header-logo-container" class="w-10 h-10 rounded-xl flex items-center justify-center text-white overflow-hidden shrink-0 shadow-xs"></div>
+        <div class="min-w-0 flex-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="header-brand-name" class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 leading-snug break-words">LogiFleet</span>
+            <span id="header-status-pill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Aperta
+            </span>
+          </div>
+          <div id="header-brand-sub" class="hidden text-xs font-medium text-slate-500 leading-normal break-words mt-0.5"></div>
+        </div>
+      </div>
+
+      <!-- Azioni Header -->
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
+        <button type="button" data-action="open-fleet-modal"
+          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
+          <span>Mezzi &amp; Autisti</span>
+          <span id="header-fleet-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums">3/0</span>
+        </button>
+
+        <button type="button" data-action="open-companies-modal"
+          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"/></svg>
+          <span>Rubrica Aziende</span>
+          <span id="header-companies-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 tabular-nums">0</span>
+        </button>
+
+        <button type="button" data-action="open-brand-modal"
+          class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 cursor-pointer">
+          <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 0 0 5.304 0l6.401-6.402M6.75 21A3.75 3.75 0 0 1 3 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 0 0 3.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008Z"/></svg>
+          <span>Personalizza App</span>
+        </button>
+
+        <button type="button" data-action="open-new-trip"
+          class="btn-primary inline-flex items-center gap-1 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-xs cursor-pointer transition-all">
+          <span>+ Nuovo Viaggio</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- FASCIA 2: Barra Data Operativa dedicata -->
+    <div class="border-t border-slate-100 bg-slate-50/90">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-1.5 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5">
+          <button type="button" data-action="set-today"
+            class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer">Oggi</button>
+          <button type="button" data-action="set-tomorrow"
+            class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 cursor-pointer">Domani</button>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-0.5 shadow-2xs">
+          <button type="button" data-action="shift-date" data-delta="-1" title="Giorno precedente"
+            class="w-7 h-7 rounded-lg hover:bg-slate-100 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition-colors">&lt;</button>
+          <span id="header-date-text" class="text-xs font-bold text-slate-900 px-2.5 whitespace-nowrap tabular-nums capitalize">Martedì 24 Novembre 2026</span>
+          <button type="button" data-action="shift-date" data-delta="1" title="Giorno successivo"
+            class="w-7 h-7 rounded-lg hover:bg-slate-100 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer transition-colors">&gt;</button>
+          <label class="relative inline-flex items-center justify-center w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 cursor-pointer border-l border-slate-100" title="Scegli data dal calendario">
+            <svg class="w-3.5 h-3.5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+            <input type="date" id="header-date-picker" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+          </label>
+        </div>
+
+        <div class="hidden sm:flex items-center">
+          <span id="header-trips-count" class="text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-lg tabular-nums">0 viaggi programmati</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASCIA 3: Barra orizzontale scorrevole 5 step sequenziali -->
+    <div class="border-t border-slate-100 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-11 flex items-center justify-between gap-2">
+        <nav id="stepper-nav" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 py-1"></nav>
+        <div class="flex items-center gap-1 shrink-0 pl-2 border-l border-slate-200">
+          <button type="button" id="btn-prev-step" data-action="move-step" data-delta="-1" title="Step precedente"
+            class="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-bold disabled:opacity-35 cursor-pointer">&lt;</button>
+          <button type="button" id="btn-next-step" data-action="move-step" data-delta="1" title="Step successivo"
+            class="w-7 h-7 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-xs font-bold disabled:opacity-35 cursor-pointer">&gt;</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN CONTENT                                                          -->
+  <!-- ===================================================================== -->
+  <main id="app-main" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6"></main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: NUOVO / MODIFICA VIAGGIO                                       -->
+  <!-- ===================================================================== -->
+  <div id="modal-trip" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full overflow-hidden my-6">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 id="modal-trip-title" class="font-bold text-base text-slate-900">Nuovo Viaggio</h3>
+          <p id="modal-trip-sub" class="text-xs text-slate-500 mt-0.5">Conto lavoro, ritiro materiale o consegna/reso</p>
+        </div>
+        <button type="button" data-action="close-trip-modal" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 cursor-pointer">✕</button>
+      </div>
+
+      <form id="form-trip" class="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+        <input type="hidden" id="ft-id" />
+
+        <!-- Selettore rapido da Rubrica Aziende -->
+        <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label for="ft-company-preset" class="text-xs font-bold text-blue-950">Scegli da Rubrica Aziende</label>
+            <button type="button" data-action="open-companies-modal" class="text-[11px] font-semibold text-blue-700 hover:underline cursor-pointer">Gestisci rubrica ↗</button>
+          </div>
+          <select id="ft-company-preset" class="w-full text-xs font-semibold border border-blue-200 rounded-xl px-3 py-2 bg-white text-slate-800 focus:outline-none focus:border-blue-500">
+            <option value="">-- Seleziona un'azienda memorizzata oppure compila sotto --</option>
+          </select>
+          <p id="ft-company-note-hint" class="hidden text-[11px] text-blue-800 font-medium pt-0.5"></p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Data Viaggio</label>
+            <input type="date" id="ft-date" required class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tipologia Flusso</label>
+            <select id="ft-type" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500">
+              <option value="Invio Conto Lavoro">Invio Conto Lavoro</option>
+              <option value="Rientro Conto Lavoro">Rientro Conto Lavoro</option>
+              <option value="Ritiro Materiale">Ritiro Materiale</option>
+              <option value="Consegna / Reso">Consegna / Reso</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Causale DDT</label>
+            <select id="ft-cause" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500">
+              <option value="C/Lavorazione">C/Lavorazione</option>
+              <option value="Acquisto">Acquisto</option>
+              <option value="Reso">Reso</option>
+              <option value="C/Vendita">C/Vendita</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Numero DDT</label>
+            <input type="text" id="ft-ddt" placeholder="DDT/001" class="w-full text-sm font-mono border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Ragione Sociale Azienda *</label>
+            <input type="text" id="ft-company" required placeholder="Inserisci ragione sociale azienda" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Indirizzo Completo (Google Maps) *</label>
+          <input type="text" id="ft-address" required placeholder="Via, numero civico, CAP, Città" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 cursor-pointer">
+          <input type="checkbox" id="ft-save-company" checked class="w-4 h-4 text-blue-600 rounded border-slate-300" />
+          <span>Memorizza automaticamente questa azienda in rubrica</span>
+        </label>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Descrizione Materiale / Lavorazione *</label>
+          <input type="text" id="ft-desc" required placeholder="Descrizione merce, bancali o lavorazione" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Colli / Bancali</label>
+            <input type="number" id="ft-pallets" min="1" max="60" value="1" required class="w-full text-sm tabular-nums border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Peso (kg) *</label>
+            <input type="number" id="ft-weight" min="1" max="40000" required placeholder="500" class="w-full text-sm tabular-nums border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Volume (m³) *</label>
+            <input type="number" id="ft-volume" step="0.1" min="0.1" max="120" required placeholder="2.0" class="w-full text-sm tabular-nums border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Km stimati</label>
+            <input type="number" id="ft-km" min="1" max="1500" value="20" class="w-full text-sm tabular-nums border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2.5 text-xs font-semibold text-slate-700 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5 cursor-pointer">
+          <input type="checkbox" id="ft-taillift" class="w-4 h-4 text-amber-600 rounded border-slate-300" />
+          <span>Richiede sponda idraulica (solo mezzi dotati di sponda)</span>
+        </label>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Veicolo</label>
+            <select id="ft-vehicle" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-blue-500"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Autista</label>
+            <select id="ft-driver" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-blue-500"></select>
+          </div>
+        </div>
+
+        <div id="ft-validation-msg" class="p-3.5 rounded-xl text-xs bg-blue-50 text-blue-900 border border-blue-200">
+          Inserisci peso e volume per verificare veicolo e patente.
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" data-action="close-trip-modal" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Annulla</button>
+          <button type="submit" id="ft-submit-btn" class="btn-primary font-semibold px-5 py-2 rounded-xl text-xs cursor-pointer">Salva Viaggio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: RUBRICA AZIENDE MEMORIZZATE                                    -->
+  <!-- ===================================================================== -->
+  <div id="modal-companies" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-4xl w-full overflow-hidden my-6">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+        <div>
+          <h3 class="font-bold text-base text-slate-900">Rubrica Aziende Memorizzate</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Terzisti conto lavoro, fornitori e destinatari per compilazione rapida viaggi e Google Maps</p>
+        </div>
+        <button type="button" data-action="close-companies-modal" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-6 max-h-[82vh] overflow-y-auto space-y-5 bg-slate-50/50">
+        <!-- Form aggiungi / modifica azienda -->
+        <form id="form-company" class="app-card p-5 space-y-3.5">
+          <input type="hidden" id="fc-id" />
+          <div class="flex items-center justify-between">
+            <h4 id="fc-form-title" class="text-xs font-bold uppercase tracking-wider text-slate-600">Aggiungi Nuova Azienda</h4>
+            <button type="button" id="fc-cancel-edit" data-action="reset-company-form" class="hidden text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer">Annulla modifica</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Ragione Sociale *</label>
+              <input type="text" id="fc-name" required placeholder="Nome azienda / terzista / fornitore" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Categoria</label>
+              <select id="fc-category" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-blue-500">
+                <option value="Terzista Conto Lavoro">Terzista Conto Lavoro</option>
+                <option value="Fornitore Materiale">Fornitore Materiale</option>
+                <option value="Cliente / Destinatario">Cliente / Destinatario</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Indirizzo Completo (usato per Google Maps) *</label>
+              <input type="text" id="fc-address" required placeholder="Via, numero civico, CAP, Città" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Referente / Telefono</label>
+              <input type="text" id="fc-contact" placeholder="Nome referente o telefono" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div class="flex-1">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Note operative (orari ribalta, uso muletto, istruzioni)</label>
+              <input type="text" id="fc-notes" placeholder="Orari carico/scarico o note di accesso" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            </div>
+            <button type="submit" id="fc-submit-btn" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer">Salva in Rubrica</button>
+          </div>
+        </form>
+
+        <!-- Barra ricerca e lista aziende -->
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span id="companies-list-count" class="text-xs font-bold text-slate-700">Aziende memorizzate</span>
+            <input type="search" id="companies-search" placeholder="Cerca per ragione sociale, indirizzo o categoria..."
+              class="w-full sm:w-80 text-xs border border-slate-200 rounded-xl px-3.5 py-2 bg-white focus:outline-none focus:border-blue-500" />
+          </div>
+          <div id="companies-list-container" class="space-y-2.5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: MEZZI & AUTISTI (COMPLETAMENTE EDITABILI DA ZERO)              -->
+  <!-- ===================================================================== -->
+  <div id="modal-fleet" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-5xl w-full overflow-hidden my-6">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <h3 class="font-bold text-base text-slate-900">Mezzi &amp; Autisti</h3>
+          <div class="inline-flex bg-slate-200/80 p-1 rounded-xl">
+            <button type="button" id="tab-fleet-btn" data-action="switch-fleet-tab" data-tab="fleet" class="px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Flotta Mezzi</button>
+            <button type="button" id="tab-drivers-btn" data-action="switch-fleet-tab" data-tab="drivers" class="px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Autisti</button>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" data-action="reset-all-blank" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 cursor-pointer">
+            Azzera Tutto (Torna a Vuoto)
+          </button>
+          <button type="button" data-action="close-fleet-modal" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 cursor-pointer">✕</button>
+        </div>
+      </div>
+      <div id="modal-fleet-body" class="p-6 max-h-[82vh] overflow-y-auto bg-slate-50/50"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: PERSONALIZZA APP (BRANDING & SEDE PARTENZA/RIENTRO)            -->
+  <!-- ===================================================================== -->
+  <div id="modal-brand" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full overflow-hidden my-6">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base text-slate-900">Personalizza App &amp; Sede</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Nome applicazione, indirizzo stabilimento, logo aziendale e palette colori</p>
+        </div>
+        <button type="button" data-action="close-brand-modal" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 cursor-pointer">✕</button>
+      </div>
+
+      <form id="form-brand" class="p-6 space-y-5 max-h-[82vh] overflow-y-auto">
+        <!-- Nome, Sottotitolo e Indirizzo Sede -->
+        <div class="space-y-3.5 pb-4 border-b border-slate-100">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Nome Applicazione</label>
+              <input type="text" id="fb-name" required maxlength="40" placeholder="LogiFleet" class="w-full text-sm font-semibold border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Sottotitolo (opzionale)</label>
+              <input type="text" id="fb-sub" maxlength="55" placeholder="Es. Logistica & Conto Lavoro" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Indirizzo Sede / Stabilimento (partenza e rientro Google Maps)</label>
+            <input type="text" id="fb-depot" placeholder="Inserisci indirizzo completo della tua sede (opzionale)" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" />
+            <p class="text-[11px] text-slate-400 mt-1">Se lasciato vuoto, Google Maps calcola il percorso direttamente dalla prima all'ultima tappa.</p>
+          </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="space-y-3 pb-4 border-b border-slate-100">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Logo Aziendale</span>
+            <button type="button" data-action="clear-brand-logo" class="text-xs font-semibold text-red-600 hover:underline cursor-pointer">Rimuovi logo</button>
+          </div>
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div id="fb-logo-preview" class="w-14 h-14 rounded-xl flex items-center justify-center text-white overflow-hidden shrink-0 shadow-xs"></div>
+            <div class="space-y-2 flex-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <label class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 cursor-pointer">
+                  <span>Carica file immagine da PC</span>
+                  <input type="file" id="fb-file" accept="image/*" class="hidden" />
+                </label>
+                <span class="text-[11px] text-slate-400">Ridimensionato automaticamente</span>
+              </div>
+              <input type="url" id="fb-url" placeholder="Oppure URL immagine (https://...)" class="w-full text-xs border border-slate-200 rounded-xl px-3 py-1.5 bg-white focus:outline-none focus:border-blue-500" />
+            </div>
+          </div>
+          <div id="fb-presets" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <!-- Colori -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Palette Colori</span>
+            <button type="button" data-action="reset-brand-defaults" class="text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer">Ripristina predefiniti</button>
+          </div>
+          <div id="fb-palettes" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+              <span>Colore Primario</span>
+              <input type="color" id="fb-c-primary" class="w-7 h-7 rounded cursor-pointer border-0 bg-transparent" />
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+              <span>Colore Accento</span>
+              <input type="color" id="fb-c-accent" class="w-7 h-7 rounded cursor-pointer border-0 bg-transparent" />
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700">
+              <span>Sfondo App</span>
+              <input type="color" id="fb-c-bg" class="w-7 h-7 rounded cursor-pointer border-0 bg-transparent" />
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" data-action="close-brand-modal" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Annulla</button>
+          <button type="submit" class="btn-primary font-semibold px-5 py-2 rounded-xl text-xs cursor-pointer">Salva Impostazioni</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: ANOMALY REPORT                                                 -->
+  <!-- ===================================================================== -->
+  <div id="modal-anomaly" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-sm text-slate-900">Segnala Anomalia / Riserva</h3>
+          <p id="ma-sub" class="text-xs text-slate-500 mt-0.5">Dettaglio viaggio</p>
+        </div>
+        <button type="button" data-action="close-anomaly-modal" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 cursor-pointer">✕</button>
+      </div>
+      <form id="form-anomaly" class="p-6 space-y-4">
+        <input type="hidden" id="ma-id" />
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nota Operativa</label>
+          <textarea id="ma-note" rows="3" required placeholder="Descrivi l'anomalia riscontrata durante il ritiro o la consegna..."
+            class="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" data-action="close-anomaly-modal" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer">Annulla</button>
+          <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-xl text-xs cursor-pointer">Salva Anomalia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT APPLICATION (PURE JS, EVENT DELEGATION, LOCALSTORAGE)      -->
+  <!-- ===================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      var STORAGE_KEY = 'logifleet_blank_v1';
+      var TODAY_ISO = '2026-11-23';
+      var TOMORROW_ISO = '2026-11-24';
+
+      var SVG_ICONS = {
+        truck: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>',
+        route: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"/></svg>',
+        box: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>',
+        factory: '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z"/></svg>'
+      };
+
+      var PRESET_ICONS = [
+        { id: 'truck', label: 'Camion' },
+        { id: 'route', label: 'Percorso' },
+        { id: 'box', label: 'Bancale' },
+        { id: 'factory', label: 'Azienda' }
+      ];
+
+      var PALETTES = [
+        { id: 'blu-ind', name: 'Blu Industriale', primary: '#0F172A', accent: '#2563EB', bgApp: '#F8FAFC' },
+        { id: 'smeraldo', name: 'Smeraldo Logistica', primary: '#064E3B', accent: '#059669', bgApp: '#F4F9F6' },
+        { id: 'arancio', name: 'Arancio Cantiere', primary: '#1C1917', accent: '#EA580C', bgApp: '#FAF8F6' },
+        { id: 'antracite', name: 'Antracite Executive', primary: '#18181B', accent: '#3F3F46', bgApp: '#F4F4F5' },
+        { id: 'viola', name: 'Viola Tech', primary: '#2E1065', accent: '#7C3AED', bgApp: '#F7F5FC' }
+      ];
+
+      var VEHICLE_COLORS = {
+        sky: {
+          label: 'Sky (Azzurro)',
+          badgeCls: 'bg-sky-50 text-sky-700 border-sky-200',
+          barCls: 'bg-sky-500',
+          dotCls: 'bg-sky-500',
+          headerCls: 'bg-sky-50/70 border-b border-sky-100'
+        },
+        indigo: {
+          label: 'Indigo (Blu)',
+          badgeCls: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+          barCls: 'bg-indigo-600',
+          dotCls: 'bg-indigo-600',
+          headerCls: 'bg-indigo-50/70 border-b border-indigo-100'
+        },
+        amber: {
+          label: 'Amber (Ambra)',
+          badgeCls: 'bg-amber-50 text-amber-800 border-amber-200',
+          barCls: 'bg-amber-500',
+          dotCls: 'bg-amber-500',
+          headerCls: 'bg-amber-50/70 border-b border-amber-100'
+        },
+        emerald: {
+          label: 'Emerald (Verde)',
+          badgeCls: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+          barCls: 'bg-emerald-600',
+          dotCls: 'bg-emerald-600',
+          headerCls: 'bg-emerald-50/70 border-b border-emerald-100'
+        },
+        rose: {
+          label: 'Rose (Rosso)',
+          badgeCls: 'bg-rose-50 text-rose-700 border-rose-200',
+          barCls: 'bg-rose-600',
+          dotCls: 'bg-rose-600',
+          headerCls: 'bg-rose-50/70 border-b border-rose-100'
+        },
+        slate: {
+          label: 'Slate (Grigio)',
+          badgeCls: 'bg-slate-100 text-slate-700 border-slate-300',
+          barCls: 'bg-slate-700',
+          dotCls: 'bg-slate-700',
+          headerCls: 'bg-slate-100/80 border-b border-slate-200'
+        }
+      };
+
+      var DEFAULT_BRAND = {
+        appName: 'LogiFleet',
+        subtitle: '',
+        depotAddress: '',
+        logoType: 'preset',
+        presetId: 'truck',
+        logoDataUrl: '',
+        logoUrl: '',
+        paletteId: 'blu-ind',
+        primary: '#0F172A',
+        accent: '#2563EB',
+        bgApp: '#F8FAFC'
+      };
+
+      var VEHICLES_STARTER = [
+        {
+          id: 'scudo',
+          name: 'Fiat Scudo',
+          plate: '',
+          maxWeight: 1400,
+          maxVolume: 6.6,
+          tailLift: false,
+          requiredLicense: 'B',
+          colorKey: 'sky',
+          defaultDriverId: ''
+        },
+        {
+          id: 'ducato',
+          name: 'Fiat Ducato',
+          plate: '',
+          maxWeight: 1850,
+          maxVolume: 15.0,
+          tailLift: false,
+          requiredLicense: 'B',
+          colorKey: 'indigo',
+          defaultDriverId: ''
+        },
+        {
+          id: 'eurocargo',
+          name: 'Iveco Eurocargo',
+          plate: '',
+          maxWeight: 8500,
+          maxVolume: 38.0,
+          tailLift: true,
+          requiredLicense: 'C',
+          colorKey: 'amber',
+          defaultDriverId: ''
+        }
+      ];
+
+      // =======================================================================
+      // COMPLETELY BLANK INITIAL STATE & LOCALSTORAGE PERSISTENCE
+      // =======================================================================
+
+      function createBlankState() {
+        return {
+          currentStep: 1,
+          selectedDate: TOMORROW_ISO,
+          calendarMode: 'week',
+          calendarRefDate: TOMORROW_ISO,
+          step1FlowFilter: 'Tutti',
+          step2VehicleFilter: 'Tutti',
+          step2Search: '',
+          fleetModalTab: 'fleet',
+          brand: Object.assign({}, DEFAULT_BRAND),
+          vehicles: JSON.parse(JSON.stringify(VEHICLES_STARTER)),
+          drivers: [],
+          companies: [],
+          trips: [],
+          subcontractStock: [],
+          closedDays: {},
+          dayNotes: {}
+        };
+      }
+
+      function loadState() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return createBlankState();
+          var parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return createBlankState();
+
+          parsed.brand = Object.assign({}, DEFAULT_BRAND, parsed.brand || {});
+          if (!Array.isArray(parsed.vehicles) || parsed.vehicles.length === 0) {
+            parsed.vehicles = JSON.parse(JSON.stringify(VEHICLES_STARTER));
+          } else {
+            parsed.vehicles = parsed.vehicles.map(function (v, idx) {
+              return {
+                id: v.id || ('VEH-' + (idx + 1)),
+                name: v.name || 'Mezzo ' + (idx + 1),
+                plate: v.plate || '',
+                maxWeight: Number(v.maxWeight) > 0 ? Number(v.maxWeight) : 1400,
+                maxVolume: Number(v.maxVolume) > 0 ? Number(v.maxVolume) : 6.0,
+                tailLift: Boolean(v.tailLift),
+                requiredLicense: v.requiredLicense === 'C' ? 'C' : 'B',
+                colorKey: VEHICLE_COLORS[v.colorKey] ? v.colorKey : 'sky',
+                defaultDriverId: v.defaultDriverId || ''
+              };
+            });
+          }
+          if (!Array.isArray(parsed.drivers)) parsed.drivers = [];
+          if (!Array.isArray(parsed.companies)) parsed.companies = [];
+          if (!Array.isArray(parsed.trips)) parsed.trips = [];
+          if (!Array.isArray(parsed.subcontractStock)) parsed.subcontractStock = [];
+          if (!parsed.closedDays || typeof parsed.closedDays !== 'object') parsed.closedDays = {};
+          if (!parsed.dayNotes || typeof parsed.dayNotes !== 'object') parsed.dayNotes = {};
+          if (typeof parsed.step2Search !== 'string') parsed.step2Search = '';
+          return parsed;
+        } catch (err) {
+          return createBlankState();
+        }
+      }
+
+      var state = loadState();
+      var brandDraft = null;
+      var companySearchQuery = '';
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          showToast('Spazio locale quasi pieno: impossibile salvare.', 'warning');
+        }
+      }
+
+      function isDayClosed(iso) {
+        return Boolean(state.closedDays && state.closedDays[iso]);
+      }
+
+      function getDayNote(iso) {
+        return (state.dayNotes && state.dayNotes[iso]) || '';
+      }
+
+      // =======================================================================
+      // HELPERS (DATES, ESCAPING, VEHICLE/DRIVER LOOKUPS)
+      // =======================================================================
+
+      function escHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function parseIso(iso) {
+        var parts = (iso || TODAY_ISO).split('-').map(Number);
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+
+      function toIso(dt) {
+        var y = dt.getFullYear();
+        var m = String(dt.getMonth() + 1).padStart(2, '0');
+        var d = String(dt.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + d;
+      }
+
+      function formatDateCompact(iso) {
+        var dt = parseIso(iso);
+        var txt = dt.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+        return txt.charAt(0).toUpperCase() + txt.slice(1);
+      }
+
+      function formatDateFull(iso) {
+        var dt = parseIso(iso);
+        var txt = dt.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        return txt.charAt(0).toUpperCase() + txt.slice(1);
+      }
+
+      function formatDateIt(iso) {
+        return parseIso(iso).toLocaleDateString('it-IT');
+      }
+
+      function getVehicleColor(v) {
+        return VEHICLE_COLORS[(v && v.colorKey) || 'sky'] || VEHICLE_COLORS.sky;
+      }
+
+      function getVehicle(id) {
+        return state.vehicles.find(function (v) { return v.id === id; }) || state.vehicles[0];
+      }
+
+      function getDriver(id) {
+        if (!id) return null;
+        return state.drivers.find(function (d) { return d.id === id; }) || null;
+      }
+
+      function driverLicenseLabel(driver) {
+        if (!driver) return '';
+        return driver.license === 'C' ? 'Patente C + CQC' : 'Patente B';
+      }
+
+      function getFirstCDriver() {
+        return state.drivers.find(function (d) { return d.license === 'C'; }) || null;
+      }
+
+      function getVehicleDayLoad(vehicleId, dateStr, excludeTripId) {
+        var v = getVehicle(vehicleId);
+        var maxW = (v && Number(v.maxWeight)) || 1400;
+        var maxV = (v && Number(v.maxVolume)) || 6.0;
+        var list = state.trips.filter(function (t) {
+          return t.vehicleId === vehicleId && t.date === dateStr && t.id !== excludeTripId;
+        });
+        var totalWeight = list.reduce(function (sum, t) { return sum + (Number(t.weight) || 0); }, 0);
+        var totalVolume = list.reduce(function (sum, t) { return sum + (Number(t.volume) || 0); }, 0);
+        return {
+          trips: list,
+          totalWeight: totalWeight,
+          totalVolume: Number(totalVolume.toFixed(1)),
+          weightPct: Math.round((totalWeight / maxW) * 100),
+          volumePct: Math.round((totalVolume / maxV) * 100)
+        };
+      }
+
+      function recommendVehicle(weight, volume, needsTailLift, dateStr, excludeTripId) {
+        var sorted = state.vehicles.slice().sort(function (a, b) {
+          return Number(a.maxWeight) - Number(b.maxWeight);
+        });
+        for (var i = 0; i < sorted.length; i++) {
+          var v = sorted[i];
+          if (needsTailLift && !v.tailLift) continue;
+          var load = getVehicleDayLoad(v.id, dateStr, excludeTripId);
+          if (load.totalWeight + weight <= Number(v.maxWeight) && load.totalVolume + volume <= Number(v.maxVolume)) {
+            return v;
+          }
+        }
+        if (needsTailLift) {
+          var withLift = sorted.filter(function (v) { return v.tailLift; });
+          if (withLift.length > 0) return withLift[withLift.length - 1];
+        }
+        return sorted[sorted.length - 1] || state.vehicles[0];
+      }
+
+      function showToast(message, type) {
+        var container = document.getElementById('toast-container');
+        if (!container) return;
+        var el = document.createElement('div');
+        var cls = 'bg-slate-900 text-white border-slate-700';
+        if (type === 'error') cls = 'bg-red-700 text-white border-red-600';
+        else if (type === 'warning') cls = 'bg-amber-600 text-white border-amber-500';
+        el.className = 'px-4 py-2.5 rounded-xl shadow-lg border text-xs font-semibold transition-opacity duration-300 ' + cls;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(function () {
+          el.style.opacity = '0';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+        }, 3400);
+      }
+
+      function getFlowBadge(type) {
+        if (type === 'Invio Conto Lavoro') {
+          return {
+            border: 'border-l-4 border-l-amber-500',
+            pill: '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">↗ Invio C/Lavoro</span>'
+          };
+        }
+        if (type === 'Rientro Conto Lavoro') {
+          return {
+            border: 'border-l-4 border-l-emerald-500',
+            pill: '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">↙ Rientro C/Lavoro</span>'
+          };
+        }
+        if (type === 'Ritiro Materiale') {
+          return {
+            border: 'border-l-4 border-l-blue-500',
+            pill: '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">↓ Ritiro Materiale</span>'
+          };
+        }
+        return {
+          border: 'border-l-4 border-l-purple-500',
+          pill: '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">↑ Consegna / Reso</span>'
+        };
+      }
+
+      function getStatusBadge(status) {
+        if (status === 'Completato') {
+          return '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Completato</span>';
+        }
+        if (status === 'Anomalia') {
+          return '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">Anomalia</span>';
+        }
+        if (status === 'In Corso') {
+          return '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">In Corso</span>';
+        }
+        return '<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">Programmato</span>';
+      }
+
+      // =======================================================================
+      // BRANDING LOGIC (NAME, DEPOT, LOGO WITH CANVAS RESIZE, PALETTES)
+      // =======================================================================
+
+      function getLogoSource(br) {
+        if (br.logoType === 'custom') {
+          return br.logoDataUrl || br.logoUrl || '';
+        }
+        return '';
+      }
+
+      function renderLogoHtml(br) {
+        var src = getLogoSource(br);
+        if (src) {
+          return '<img src="' + escHtml(src) + '" alt="Logo" class="w-full h-full object-contain p-0.5" />';
+        }
+        return SVG_ICONS[br.presetId] || SVG_ICONS.truck;
+      }
+
+      function applyBranding(br) {
+        var b = br || state.brand;
+        document.documentElement.style.setProperty('--brand-primary', b.primary);
+        document.documentElement.style.setProperty('--brand-accent', b.accent);
+        document.documentElement.style.setProperty('--bg-app', b.bgApp);
+
+        var name = (b.appName || 'LogiFleet').trim() || 'LogiFleet';
+        var sub = (b.subtitle || '').trim();
+        document.title = sub ? (name + ' — ' + sub) : (name + ' — Logistica & Conto Lavoro');
+
+        var nameEl = document.getElementById('header-brand-name');
+        var subEl = document.getElementById('header-brand-sub');
+        var logoEl = document.getElementById('header-logo-container');
+
+        if (nameEl) nameEl.textContent = name;
+        if (subEl) {
+          if (sub) {
+            subEl.textContent = sub;
+            subEl.classList.remove('hidden');
+          } else {
+            subEl.textContent = '';
+            subEl.classList.add('hidden');
+          }
+        }
+        if (logoEl) {
+          var hasImg = Boolean(getLogoSource(b));
+          if (hasImg) {
+            logoEl.className = 'h-10 min-w-[2.5rem] max-w-[6.5rem] px-1.5 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0';
+            logoEl.style.background = '#FFFFFF';
+          } else {
+            logoEl.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-white overflow-hidden shrink-0 shadow-xs';
+            logoEl.style.background = 'linear-gradient(135deg, ' + b.primary + ', ' + b.accent + ')';
+          }
+          logoEl.innerHTML = renderLogoHtml(b);
+        }
+      }
+
+      function openBrandModal() {
+        brandDraft = Object.assign({}, state.brand);
+        document.getElementById('fb-name').value = brandDraft.appName || '';
+        document.getElementById('fb-sub').value = brandDraft.subtitle || '';
+        document.getElementById('fb-depot').value = brandDraft.depotAddress || '';
+        document.getElementById('fb-url').value = brandDraft.logoUrl || '';
+        document.getElementById('fb-file').value = '';
+        document.getElementById('fb-c-primary').value = brandDraft.primary;
+        document.getElementById('fb-c-accent').value = brandDraft.accent;
+        document.getElementById('fb-c-bg').value = brandDraft.bgApp;
+        renderBrandModalControls();
+        applyBranding(brandDraft);
+        document.getElementById('modal-brand').classList.remove('hidden');
+      }
+
+      function closeBrandModal() {
+        brandDraft = null;
+        document.getElementById('modal-brand').classList.add('hidden');
+        applyBranding(state.brand);
+      }
+
+      function renderBrandModalControls() {
+        if (!brandDraft) return;
+        var prev = document.getElementById('fb-logo-preview');
+        var hasImg = Boolean(getLogoSource(brandDraft));
+        if (hasImg) {
+          prev.className = 'w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden shrink-0';
+          prev.style.background = '#FFFFFF';
+        } else {
+          prev.className = 'w-14 h-14 rounded-xl flex items-center justify-center text-white overflow-hidden shrink-0 shadow-xs';
+          prev.style.background = 'linear-gradient(135deg, ' + brandDraft.primary + ', ' + brandDraft.accent + ')';
+        }
+        prev.innerHTML = renderLogoHtml(brandDraft);
+
+        document.getElementById('fb-presets').innerHTML = PRESET_ICONS.map(function (ic) {
+          var active = brandDraft.logoType === 'preset' && brandDraft.presetId === ic.id;
+          return '<button type="button" data-action="select-preset-icon" data-id="' + ic.id + '" ' +
+            'class="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-semibold border cursor-pointer ' +
+            (active ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50') + '">' +
+            SVG_ICONS[ic.id] + '<span>' + ic.label + '</span></button>';
+        }).join('');
+
+        document.getElementById('fb-palettes').innerHTML = PALETTES.map(function (pal) {
+          var active = brandDraft.paletteId === pal.id;
+          return '<button type="button" data-action="select-palette" data-id="' + pal.id + '" ' +
+            'class="flex items-center gap-2 p-2.5 rounded-xl text-left text-xs font-semibold border cursor-pointer ' +
+            (active ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50') + '">' +
+            '<span class="flex -space-x-1 shrink-0">' +
+            '<span class="w-4 h-4 rounded-full border border-white" style="background:' + pal.primary + '"></span>' +
+            '<span class="w-4 h-4 rounded-full border border-white" style="background:' + pal.accent + '"></span>' +
+            '</span><span class="truncate">' + pal.name + '</span></button>';
+        }).join('');
+      }
+
+      function resizeImageToDataUrl(file, callback) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var img = new Image();
+          img.onload = function () {
+            var maxDim = 180;
+            var w = img.width;
+            var h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/png'));
+          };
+          img.onerror = function () {
+            callback(String(e.target.result || ''));
+          };
+          img.src = String(e.target.result || '');
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // =======================================================================
+      // HEADER & STEPPER RENDERING
+      // =======================================================================
+
+      function renderHeader() {
+        applyBranding(state.brand);
+        var closed = isDayClosed(state.selectedDate);
+        document.getElementById('header-date-text').textContent = formatDateFull(state.selectedDate);
+
+        var picker = document.getElementById('header-date-picker');
+        if (picker) picker.value = state.selectedDate;
+
+        var fleetBadge = document.getElementById('header-fleet-badge');
+        if (fleetBadge) fleetBadge.textContent = state.vehicles.length + '/' + state.drivers.length;
+
+        var compBadge = document.getElementById('header-companies-badge');
+        if (compBadge) compBadge.textContent = String(state.companies.length);
+
+        var countEl = document.getElementById('header-trips-count');
+        if (countEl) {
+          var dayCount = state.trips.filter(function (t) { return t.date === state.selectedDate; }).length;
+          countEl.textContent = dayCount === 1 ? '1 viaggio programmato' : (dayCount + ' viaggi programmati');
+        }
+
+        var pill = document.getElementById('header-status-pill');
+        if (closed) {
+          pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-200 text-slate-700 border border-slate-300 shrink-0';
+          pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>Chiusa';
+        } else {
+          pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0';
+          pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aperta';
+        }
+
+        document.getElementById('btn-prev-step').disabled = state.currentStep <= 1;
+        document.getElementById('btn-next-step').disabled = state.currentStep >= 5;
+
+        var steps = [
+          { num: 1, label: 'Prog. Sera Prima' },
+          { num: 2, label: 'Elenco & DDT' },
+          { num: 3, label: 'Giro Tappe & Maps' },
+          { num: 4, label: 'Viaggi & Terzisti' },
+          { num: 5, label: 'Chiusura Giornata' }
+        ];
+
+        document.getElementById('stepper-nav').innerHTML = steps.map(function (s, idx) {
+          var active = state.currentStep === s.num;
+          var done = s.num < state.currentStep || closed;
+          var btnCls = 'text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent';
+          var numCls = 'bg-slate-200 text-slate-700';
+          if (active) {
+            btnCls = 'btn-primary shadow-xs';
+            numCls = 'btn-accent';
+          } else if (done) {
+            btnCls = 'bg-emerald-50 text-emerald-800 border border-emerald-200';
+            numCls = 'bg-emerald-600 text-white';
+          }
+          var sep = idx < steps.length - 1 ? '<span class="text-slate-300 text-xs px-0.5 select-none">›</span>' : '';
+          return '<button type="button" id="step-btn-' + s.num + '" data-action="go-step" data-step="' + s.num + '" ' +
+            'class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer transition-all ' + btnCls + '">' +
+            '<span class="w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center tabular-nums ' + numCls + '">' +
+            (done && !active ? '✓' : s.num) + '</span>' +
+            '<span>' + s.num + '. ' + s.label + '</span></button>' + sep;
+        }).join('');
+      }
+
+      // =======================================================================
+      // GUIDED INITIAL SETUP BANNER (SHOWN WHEN DEPOT OR DRIVERS ARE EMPTY)
+      // =======================================================================
+
+      function renderSetupBanner() {
+        var hasDepot = Boolean((state.brand.depotAddress || '').trim());
+        var hasDrivers = state.drivers.length > 0;
+        var hasCompanies = state.companies.length > 0;
+        var hasTrips = state.trips.length > 0;
+
+        if (hasDepot && hasDrivers) return '';
+
+        var steps = [
+          {
+            num: 1,
+            title: 'Imposta Sede & Brand',
+            desc: hasDepot ? state.brand.depotAddress : 'Indirizzo partenza/rientro Maps, logo e nome app',
+            done: hasDepot,
+            action: 'open-brand-modal'
+          },
+          {
+            num: 2,
+            title: 'Configura Mezzi & Autisti',
+            desc: hasDrivers ? (state.drivers.length + ' autisti configurati') : 'Inserisci targhe, portate e patenti (B / C+CQC)',
+            done: hasDrivers,
+            action: 'open-fleet-modal'
+          },
+          {
+            num: 3,
+            title: 'Aggiungi Aziende in Rubrica',
+            desc: hasCompanies ? (state.companies.length + ' aziende salvate') : 'Terzisti conto lavoro, fornitori e destinatari',
+            done: hasCompanies,
+            action: 'open-companies-modal'
+          },
+          {
+            num: 4,
+            title: 'Inserisci Primo Viaggio',
+            desc: hasTrips ? (state.trips.length + ' viaggi inseriti') : 'Pianifica il primo ritiro, invio o rientro',
+            done: hasTrips,
+            action: 'open-new-trip'
+          }
+        ];
+
+        return '<div class="app-card p-4 sm:p-5 bg-gradient-to-r from-blue-50/80 via-white to-slate-50 border-blue-200/80 space-y-3">' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">' +
+          '<div class="flex items-center gap-2">' +
+          '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-600 text-white">Avvio Rapido</span>' +
+          '<h2 class="text-sm font-bold text-slate-900">Configura la tua logistica da zero</h2>' +
+          '</div>' +
+          '<span class="text-xs text-slate-500">Tutti i dati si salvano automaticamente sul dispositivo</span>' +
+          '</div>' +
+          '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">' +
+          steps.map(function (st) {
+            return '<button type="button" data-action="' + st.action + '" ' +
+              'class="p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ' +
+              (st.done ? 'bg-emerald-50/70 border-emerald-200 hover:bg-emerald-50' : 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-2xs') + '">' +
+              '<span class="w-5 h-5 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 ' +
+              (st.done ? 'bg-emerald-600 text-white' : 'bg-blue-100 text-blue-700') + '">' + (st.done ? '✓' : st.num) + '</span>' +
+              '<div class="min-w-0">' +
+              '<div class="text-xs font-bold text-slate-900">' + st.title + '</div>' +
+              '<div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">' + escHtml(st.desc) + '</div>' +
+              '</div></button>';
+          }).join('') +
+          '</div></div>';
+      }
+
+      // =======================================================================
+      // STEP 1: PROGRAMMAZIONE SERA PRIMA
+      // =======================================================================
+
+      function renderStep1() {
+        var closed = isDayClosed(state.selectedDate);
+        var ref = parseIso(state.calendarRefDate);
+        var cells = [];
+
+        if (state.calendarMode === 'week') {
+          var dow = ref.getDay();
+          var diff = dow === 0 ? -6 : 1 - dow;
+          var mon = new Date(ref);
+          mon.setDate(ref.getDate() + diff);
+          for (var i = 0; i < 7; i++) {
+            var d = new Date(mon);
+            d.setDate(mon.getDate() + i);
+            cells.push({ dt: d, iso: toIso(d), inMonth: true });
+          }
+        } else {
+          var first = new Date(ref.getFullYear(), ref.getMonth(), 1);
+          var fDow = first.getDay();
+          var offset = fDow === 0 ? -6 : 1 - fDow;
+          var start = new Date(first);
+          start.setDate(first.getDate() + offset);
+          for (var j = 0; j < 35; j++) {
+            var dm = new Date(start);
+            dm.setDate(start.getDate() + j);
+            cells.push({ dt: dm, iso: toIso(dm), inMonth: dm.getMonth() === ref.getMonth() });
+          }
+        }
+
+        var monthLabel = ref.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+        var dayHeaders = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+
+        var cellsHtml = cells.map(function (c) {
+          var count = state.trips.filter(function (t) { return t.date === c.iso; }).length;
+          var dayClosed = isDayClosed(c.iso);
+          var selected = c.iso === state.selectedDate;
+          var tag = c.iso === TODAY_ISO ? ' · Oggi' : (c.iso === TOMORROW_ISO ? ' · Domani' : '');
+
+          if (state.calendarMode === 'week') {
+            var wName = c.dt.toLocaleDateString('it-IT', { weekday: 'short' });
+            return '<button type="button" data-action="select-date" data-date="' + c.iso + '" ' +
+              'class="p-3.5 rounded-2xl text-left cursor-pointer flex flex-col justify-between min-h-[86px] transition-all ' +
+              (selected ? 'btn-primary shadow-sm' : 'bg-white border border-slate-200 hover:border-slate-300 text-slate-800') + '">' +
+              '<div class="flex items-center justify-between w-full">' +
+              '<span class="text-xs font-semibold capitalize ' + (selected ? 'opacity-80' : 'text-slate-500') + '">' + wName + tag + '</span>' +
+              '<span class="w-2 h-2 rounded-full ' + (dayClosed ? 'bg-slate-400' : 'bg-emerald-500') + '"></span>' +
+              '</div>' +
+              '<div class="flex items-end justify-between w-full mt-2">' +
+              '<span class="text-xl font-extrabold tabular-nums">' + c.dt.getDate() + '</span>' +
+              (count > 0
+                ? '<span class="text-[11px] font-bold px-2 py-0.5 rounded-full tabular-nums ' + (selected ? 'btn-accent' : 'bg-slate-100 text-slate-700') + '">' + count + ' viaggi</span>'
+                : '<span class="text-xs opacity-40">0</span>') +
+              '</div></button>';
+          }
+
+          return '<button type="button" data-action="select-date" data-date="' + c.iso + '" ' +
+            'class="p-2.5 min-h-[66px] text-left cursor-pointer flex flex-col justify-between ' +
+            (selected ? 'bg-blue-50 text-blue-950 font-semibold' : (c.inMonth ? 'bg-white hover:bg-slate-50 text-slate-800' : 'bg-slate-50 text-slate-400')) + '">' +
+            '<div class="flex items-center justify-between w-full">' +
+            '<span class="text-xs tabular-nums ' + (selected ? 'w-6 h-6 rounded-full btn-primary font-bold flex items-center justify-center' : '') + '">' + c.dt.getDate() + '</span>' +
+            '<span class="w-1.5 h-1.5 rounded-full ' + (dayClosed ? 'bg-slate-400' : 'bg-emerald-500') + '"></span>' +
+            '</div>' +
+            (count > 0 ? '<div class="text-[10px] font-bold text-blue-600 tabular-nums mt-1">' + count + ' viaggi</div>' : '') +
+            '</button>';
+        }).join('');
+
+        var calSection = state.calendarMode === 'week'
+          ? '<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">' + cellsHtml + '</div>'
+          : '<div class="app-card overflow-hidden"><div class="grid grid-cols-7 bg-slate-50 border-b border-slate-200 text-center text-xs font-bold text-slate-500 py-2">' +
+            dayHeaders.map(function (d) { return '<div>' + d + '</div>'; }).join('') +
+            '</div><div class="grid grid-cols-7 divide-x divide-y divide-slate-100">' + cellsHtml + '</div></div>';
+
+        var vehiclesHtml = state.vehicles.map(function (v) {
+          var col = getVehicleColor(v);
+          var load = getVehicleDayLoad(v.id, state.selectedDate);
+          var drv = getDriver(v.defaultDriverId);
+          var barColor = load.weightPct > 100 ? 'bg-red-500' : col.barCls;
+          var plateTxt = (v.plate || '').trim() || 'Targa non impostata';
+          var drvTxt = drv ? drv.name : 'Autista non assegnato';
+
+          return '<div class="app-card p-5 space-y-3.5">' +
+            '<div class="flex items-start justify-between gap-2">' +
+            '<div class="min-w-0">' +
+            '<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full shrink-0 ' + col.dotCls + '"></span>' +
+            '<h3 class="font-bold text-sm text-slate-900 truncate">' + escHtml(v.name) + '</h3></div>' +
+            '<p class="text-xs text-slate-500 mt-1 truncate">' + escHtml(drvTxt) + ' • <span class="font-mono">' + escHtml(plateTxt) + '</span></p>' +
+            '</div>' +
+            '<div class="flex flex-col items-end gap-1 shrink-0">' +
+            '<span class="text-xs font-bold px-2.5 py-0.5 rounded-full border ' + col.badgeCls + ' tabular-nums">' + load.trips.length + ' viaggi</span>' +
+            '<div class="flex items-center gap-1">' +
+            (v.tailLift ? '<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">Sponda</span>' : '') +
+            (v.requiredLicense === 'C'
+              ? '<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">Pat. C + CQC</span>'
+              : '<span class="text-[10px] font-semibold text-slate-400">Pat. B</span>') +
+            '</div></div></div>' +
+            '<div class="space-y-2">' +
+            '<div><div class="flex justify-between text-xs mb-1">' +
+            '<span class="text-slate-500">Peso caricato</span>' +
+            '<span class="font-bold text-slate-800 tabular-nums">' + load.totalWeight.toLocaleString('it-IT') + ' / ' + Number(v.maxWeight).toLocaleString('it-IT') + ' kg (' + load.weightPct + '%)</span></div>' +
+            '<div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ' + barColor + ' rounded-full" style="width:' + Math.min(100, load.weightPct) + '%"></div></div></div>' +
+            '<div><div class="flex justify-between text-xs mb-1">' +
+            '<span class="text-slate-500">Volume occupato</span>' +
+            '<span class="font-semibold text-slate-700 tabular-nums">' + load.totalVolume + ' / ' + v.maxVolume + ' m³ (' + load.volumePct + '%)</span></div>' +
+            '<div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ' + col.barCls + ' opacity-75 rounded-full" style="width:' + Math.min(100, load.volumePct) + '%"></div></div></div>' +
+            '</div></div>';
+        }).join('');
+
+        var dayTrips = state.trips.filter(function (t) { return t.date === state.selectedDate; });
+        var flows = ['Tutti', 'Invio Conto Lavoro', 'Rientro Conto Lavoro', 'Ritiro Materiale', 'Consegna / Reso'];
+        var filtered = dayTrips.filter(function (t) {
+          return state.step1FlowFilter === 'Tutti' || t.type === state.step1FlowFilter;
+        });
+
+        var listHtml = filtered.length === 0
+          ? '<div class="app-card p-10 text-center space-y-3">' +
+            '<div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto">' + SVG_ICONS.truck + '</div>' +
+            '<div class="space-y-1">' +
+            '<h3 class="text-sm font-bold text-slate-900">Nessun viaggio programmato per ' + formatDateCompact(state.selectedDate) + '</h3>' +
+            '<p class="text-xs text-slate-500 max-w-md mx-auto">Inizia inserendo il tuo primo viaggio oppure configura mezzi, autisti e aziende dai pulsanti qui sotto.</p>' +
+            '</div>' +
+            (closed ? '' : '<div class="flex flex-wrap items-center justify-center gap-2">' +
+              '<button type="button" data-action="open-new-trip" class="btn-primary px-4 py-2 rounded-xl text-xs font-semibold shadow-xs cursor-pointer">+ Nuovo Viaggio</button>' +
+              '<button type="button" data-action="open-fleet-modal" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer">Configura Mezzi &amp; Autisti</button>' +
+              '<button type="button" data-action="open-companies-modal" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer">Rubrica Aziende</button>' +
+              '</div>') +
+            '</div>'
+          : '<div class="space-y-3">' + filtered.map(function (t) {
+            var v = getVehicle(t.vehicleId);
+            var col = getVehicleColor(v);
+            var fb = getFlowBadge(t.type);
+            var actions = closed ? '' :
+              '<div class="flex items-center gap-2 shrink-0">' +
+              '<button type="button" data-action="edit-trip" data-id="' + escHtml(t.id) + '" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer">Modifica</button>' +
+              '<button type="button" data-action="delete-trip" data-id="' + escHtml(t.id) + '" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 cursor-pointer">Elimina</button>' +
+              '</div>';
+            return '<div class="app-card ' + fb.border + ' p-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+              '<div class="space-y-1.5 min-w-0">' +
+              '<div class="flex flex-wrap items-center gap-2">' + fb.pill +
+              '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + col.badgeCls + '">' + escHtml(v ? v.name : '-') + '</span>' +
+              '<span class="text-xs font-mono font-semibold text-slate-500">' + escHtml(t.ddtNumber) + '</span></div>' +
+              '<div class="text-sm font-bold text-slate-900">' + escHtml(t.companyName) + ' <span class="font-medium text-slate-500">— ' + escHtml(t.description) + '</span></div>' +
+              '<div class="text-xs text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1 tabular-nums">' +
+              '<span>' + escHtml(t.address) + '</span><span>•</span>' +
+              '<span class="font-semibold text-slate-700">' + t.pallets + ' colli · ' + Number(t.weight).toLocaleString('it-IT') + ' kg · ' + t.volume + ' m³</span>' +
+              '</div></div>' + actions + '</div>';
+          }).join('') + '</div>';
+
+        return '<div class="space-y-6">' +
+          renderSetupBanner() +
+
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
+          '<div><h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Programmazione Viaggi Sera Prima</h1>' +
+          '<p class="text-sm text-slate-500 mt-0.5">' + formatDateCompact(state.selectedDate) + ' • Pianificazione ritiri, invii e rientri conto lavoro</p></div>' +
+          '<div class="flex flex-wrap items-center gap-2">' +
+          '<button type="button" data-action="open-new-trip" ' + (closed ? 'disabled' : '') + ' class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 cursor-pointer disabled:opacity-40">+ Aggiungi Viaggio</button>' +
+          '<button type="button" data-action="go-step" data-step="2" class="btn-accent px-4 py-2 rounded-xl text-xs font-semibold shadow-xs cursor-pointer">Conferma e Vai a Elenco &amp; DDT →</button>' +
+          '</div></div>' +
+
+          '<div class="space-y-3">' +
+          '<div class="flex items-center justify-between">' +
+          '<div class="flex items-center gap-2"><span class="text-sm font-bold text-slate-800 capitalize">' + monthLabel + '</span>' +
+          '<button type="button" data-action="shift-cal" data-delta="-1" class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer">&lt;</button>' +
+          '<button type="button" data-action="shift-cal" data-delta="1" class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer">&gt;</button></div>' +
+          '<div class="inline-flex bg-slate-200/80 p-0.5 rounded-xl">' +
+          '<button type="button" data-action="set-cal-mode" data-mode="week" class="px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ' + (state.calendarMode === 'week' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600') + '">Settimana</button>' +
+          '<button type="button" data-action="set-cal-mode" data-mode="month" class="px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ' + (state.calendarMode === 'month' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600') + '">Mese</button>' +
+          '</div></div>' + calSection + '</div>' +
+
+          '<div class="space-y-2.5">' +
+          '<div class="flex items-center justify-between">' +
+          '<h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Flotta Mezzi (' + state.vehicles.length + ')</h2>' +
+          '<button type="button" data-action="open-fleet-modal" class="text-xs font-semibold text-blue-600 hover:underline cursor-pointer">Modifica mezzi e autisti ↗</button>' +
+          '</div>' +
+          '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">' + vehiclesHtml + '</div>' +
+          '</div>' +
+
+          '<div class="space-y-3">' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">' +
+          '<h2 class="text-sm font-bold text-slate-900">Viaggi programmati (' + filtered.length + ')</h2>' +
+          '<div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">' +
+          flows.map(function (fl) {
+            var active = state.step1FlowFilter === fl;
+            return '<button type="button" data-action="filter-step1-flow" data-flow="' + escHtml(fl) + '" ' +
+              'class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ' +
+              (active ? 'btn-primary' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50') + '">' + escHtml(fl) + '</button>';
+          }).join('') +
+          '</div></div>' + listHtml + '</div></div>';
+      }
+
+      // =======================================================================
+      // STEP 2: ELENCO VIAGGI & DDT
+      // =======================================================================
+
+      function renderStep2() {
+        var closed = isDayClosed(state.selectedDate);
+        var dayTrips = state.trips.filter(function (t) { return t.date === state.selectedDate; });
+        var q = (state.step2Search || '').toLowerCase().trim();
+
+        var filtered = dayTrips.filter(function (t) {
+          var okVeh = state.step2VehicleFilter === 'Tutti' || t.vehicleId === state.step2VehicleFilter;
+          var okSearch = !q ||
+            (t.companyName || '').toLowerCase().indexOf(q) !== -1 ||
+            (t.ddtNumber || '').toLowerCase().indexOf(q) !== -1 ||
+            (t.description || '').toLowerCase().indexOf(q) !== -1;
+          return okVeh && okSearch;
+        });
+
+        var vehTabs = [{ id: 'Tutti', label: 'Tutti i Mezzi (' + dayTrips.length + ')' }].concat(
+          state.vehicles.map(function (v) {
+            var cnt = dayTrips.filter(function (t) { return t.vehicleId === v.id; }).length;
+            return { id: v.id, label: v.name + ' (' + cnt + ')' };
+          })
+        );
+
+        var rowsHtml = filtered.length === 0
+          ? '<div class="app-card p-10 text-center space-y-3">' +
+            '<div class="text-sm font-bold text-slate-800">Nessun viaggio trovato per ' + formatDateCompact(state.selectedDate) + '</div>' +
+            '<p class="text-xs text-slate-500">Aggiungi un nuovo viaggio o modifica i filtri di ricerca.</p>' +
+            (closed ? '' : '<div><button type="button" data-action="open-new-trip" class="btn-primary px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">+ Nuovo Viaggio</button></div>') +
+            '</div>'
+          : '<div class="space-y-3">' + filtered.map(function (t) {
+            var fb = getFlowBadge(t.type);
+            var dis = closed ? 'disabled' : '';
+            var causes = ['C/Lavorazione', 'Acquisto', 'Reso', 'C/Vendita'];
+            var driverOpts = '<option value="">-- Nessun autista --</option>' +
+              state.drivers.map(function (d) {
+                return '<option value="' + escHtml(d.id) + '" ' + (t.driverId === d.id ? 'selected' : '') + '>' + escHtml(d.name) + ' (' + (d.license === 'C' ? 'C+CQC' : 'B') + ')</option>';
+              }).join('');
+
+            return '<div class="app-card ' + fb.border + ' p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4">' +
+              '<div class="space-y-1.5 min-w-0 flex-1">' +
+              '<div class="flex flex-wrap items-center gap-2">' + fb.pill + getStatusBadge(t.status) +
+              '<span class="text-xs font-semibold text-slate-500 tabular-nums">' + t.pallets + ' colli · ' + Number(t.weight).toLocaleString('it-IT') + ' kg · ' + t.volume + ' m³</span>' +
+              (t.needsTailLift ? '<span class="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Sponda Idr.</span>' : '') +
+              '</div>' +
+              '<div class="text-sm font-bold text-slate-900">' + escHtml(t.companyName) + ' <span class="font-medium text-slate-500">— ' + escHtml(t.description) + '</span></div>' +
+              '<div class="text-xs text-slate-400 truncate">' + escHtml(t.address) + '</div></div>' +
+
+              '<div class="flex flex-wrap items-center gap-2.5 shrink-0">' +
+              '<div><span class="block text-[10px] font-bold uppercase text-slate-400 mb-0.5">Numero DDT</span>' +
+              '<input type="text" ' + dis + ' data-inline="ddtNumber" data-id="' + escHtml(t.id) + '" value="' + escHtml(t.ddtNumber) + '" ' +
+              'class="w-32 text-xs font-mono font-semibold border border-slate-200 rounded-xl px-3 py-1.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500" /></div>' +
+
+              '<div><span class="block text-[10px] font-bold uppercase text-slate-400 mb-0.5">Causale DDT</span>' +
+              '<select ' + dis + ' data-inline="ddtCause" data-id="' + escHtml(t.id) + '" class="text-xs font-semibold border border-slate-200 rounded-xl px-3 py-1.5 bg-slate-50 focus:bg-white">' +
+              causes.map(function (c) { return '<option value="' + c + '" ' + (t.ddtCause === c ? 'selected' : '') + '>' + c + '</option>'; }).join('') +
+              '</select></div>' +
+
+              '<div><span class="block text-[10px] font-bold uppercase text-slate-400 mb-0.5">Mezzo</span>' +
+              '<select ' + dis + ' data-inline="vehicleId" data-id="' + escHtml(t.id) + '" class="text-xs font-semibold border border-slate-200 rounded-xl px-3 py-1.5 bg-slate-50 focus:bg-white">' +
+              state.vehicles.map(function (v) { return '<option value="' + escHtml(v.id) + '" ' + (t.vehicleId === v.id ? 'selected' : '') + '>' + escHtml(v.name) + '</option>'; }).join('') +
+              '</select></div>' +
+
+              '<div><span class="block text-[10px] font-bold uppercase text-slate-400 mb-0.5">Autista</span>' +
+              '<select ' + dis + ' data-inline="driverId" data-id="' + escHtml(t.id) + '" class="text-xs font-semibold border border-slate-200 rounded-xl px-3 py-1.5 bg-slate-50 focus:bg-white">' +
+              driverOpts + '</select></div>' +
+              '</div></div>';
+          }).join('') + '</div>';
+
+        return '<div class="space-y-6">' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
+          '<div><h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Elenco Viaggi &amp; DDT</h1>' +
+          '<p class="text-sm text-slate-500 mt-0.5">' + formatDateCompact(state.selectedDate) + ' • Verifica documenti di trasporto, mezzi e patenti</p></div>' +
+          '<button type="button" data-action="go-step" data-step="3" class="btn-accent px-4 py-2 rounded-xl text-xs font-semibold shadow-xs self-start sm:self-auto cursor-pointer">Passa a Giro Tappe &amp; Maps →</button>' +
+          '</div>' +
+
+          '<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">' +
+          '<div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">' +
+          vehTabs.map(function (vt) {
+            var active = state.step2VehicleFilter === vt.id;
+            return '<button type="button" data-action="filter-step2-veh" data-veh="' + escHtml(vt.id) + '" ' +
+              'class="px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer ' +
+              (active ? 'btn-primary' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50') + '">' + escHtml(vt.label) + '</button>';
+          }).join('') +
+          '</div>' +
+          '<input type="search" id="step2-search-input" value="' + escHtml(state.step2Search || '') + '" placeholder="Cerca azienda, DDT o materiale..." ' +
+          'class="w-full lg:w-72 text-xs border border-slate-200 rounded-xl px-3.5 py-2 bg-white focus:outline-none focus:border-blue-500" />' +
+          '</div>' + rowsHtml + '</div>';
+      }
+
+      // =======================================================================
+      // STEP 3: GIRO TAPPE & GOOGLE MAPS
+      // =======================================================================
+
+      function renderStep3() {
+        var closed = isDayClosed(state.selectedDate);
+        var depotAddr = (state.brand.depotAddress || '').trim();
+        var originEnc = depotAddr ? encodeURIComponent(depotAddr) : '';
+
+        var colsHtml = state.vehicles.map(function (v) {
+          var col = getVehicleColor(v);
+          var drv = getDriver(v.defaultDriverId);
+          var stops = state.trips
+            .filter(function (t) { return t.vehicleId === v.id && t.date === state.selectedDate; })
+            .sort(function (a, b) { return (a.stopOrder || 0) - (b.stopOrder || 0); });
+
+          var initialWeight = stops
+            .filter(function (s) { return s.type === 'Invio Conto Lavoro' || s.type === 'Consegna / Reso'; })
+            .reduce(function (sum, s) { return sum + (Number(s.weight) || 0); }, 0);
+
+          var running = initialWeight;
+          var peak = initialWeight;
+          var totalKm = 0;
+
+          var telemetry = stops.map(function (s, idx) {
+            var isPickup = s.type === 'Rientro Conto Lavoro' || s.type === 'Ritiro Materiale';
+            running = isPickup ? running + Number(s.weight) : Math.max(0, running - Number(s.weight));
+            if (running > peak) peak = running;
+            totalKm += (Number(s.km) || 20);
+            return Object.assign({}, s, {
+              seq: idx + 1,
+              isPickup: isPickup,
+              weightAfter: running,
+              overLimit: running > Number(v.maxWeight)
+            });
+          });
+
+          if (telemetry.length > 0 && depotAddr) totalKm += 15;
+          var peakPct = Math.min(100, Math.round((peak / Number(v.maxWeight)) * 100));
+          var overAny = peak > Number(v.maxWeight);
+          var barColor = overAny ? 'bg-red-500' : col.barCls;
+
+          var fullMapsUrl = '#';
+          if (telemetry.length === 0) {
+            fullMapsUrl = depotAddr
+              ? 'https://www.google.com/maps/search/?api=1&query=' + originEnc
+              : 'https://www.google.com/maps';
+          } else if (depotAddr) {
+            fullMapsUrl = 'https://www.google.com/maps/dir/' + originEnc + '/' +
+              telemetry.map(function (s) { return encodeURIComponent(s.address); }).join('/') + '/' + originEnc;
+          } else {
+            fullMapsUrl = 'https://www.google.com/maps/dir/' +
+              telemetry.map(function (s) { return encodeURIComponent(s.address); }).join('/');
+          }
+
+          var stopsListHtml = telemetry.length === 0
+            ? '<div class="py-8 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">Nessuna tappa assegnata</div>'
+            : telemetry.map(function (s, idx) {
+              var singleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
+              var orderBtns = closed ? '' :
+                '<div class="flex items-center gap-1 shrink-0">' +
+                '<button type="button" ' + (idx === 0 ? 'disabled' : '') + ' data-action="move-stop" data-veh="' + escHtml(v.id) + '" data-id="' + escHtml(s.id) + '" data-dir="up" ' +
+                'class="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-30 text-xs font-bold cursor-pointer">↑</button>' +
+                '<button type="button" ' + (idx === telemetry.length - 1 ? 'disabled' : '') + ' data-action="move-stop" data-veh="' + escHtml(v.id) + '" data-id="' + escHtml(s.id) + '" data-dir="down" ' +
+                'class="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-30 text-xs font-bold cursor-pointer">↓</button></div>';
+
+              return '<div class="relative pl-7">' +
+                '<span class="absolute left-0 top-3 w-5 h-5 rounded-full btn-primary text-[11px] font-bold flex items-center justify-center tabular-nums">' + s.seq + '</span>' +
+                '<div class="p-3.5 rounded-xl border ' + (s.overLimit ? 'bg-red-50 border-red-300' : 'bg-slate-50 border-slate-200') + ' space-y-2">' +
+                '<div class="flex items-start justify-between gap-2"><div class="min-w-0">' +
+                '<div class="text-xs font-bold text-slate-900 truncate">' + escHtml(s.companyName) + '</div>' +
+                '<div class="text-[11px] text-slate-500 truncate mt-0.5">' + escHtml(s.address) + '</div></div>' + orderBtns + '</div>' +
+                '<div class="flex flex-wrap items-center justify-between gap-1.5 text-[11px] pt-1.5 border-t border-slate-200/70 tabular-nums">' +
+                '<span class="px-2 py-0.5 rounded font-semibold ' + (s.isPickup ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800') + '">' +
+                (s.isPickup ? ('+' + s.weight + ' kg Carico') : ('-' + s.weight + ' kg Scarico')) + '</span>' +
+                '<span class="font-semibold ' + (s.overLimit ? 'text-red-600 font-bold' : 'text-slate-600') + '">A bordo: ' + s.weightAfter.toLocaleString('it-IT') + ' kg</span>' +
+                '<a href="' + singleMapsUrl + '" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-bold">Maps ↗</a>' +
+                '</div></div></div>';
+            }).join('');
+
+          var plateTxt = (v.plate || '').trim() || 'Targa n.d.';
+          var drvTxt = drv ? drv.name : 'Autista non assegnato';
+
+          return '<div class="app-card overflow-hidden flex flex-col justify-between min-w-[310px] snap-start">' +
+            '<div>' +
+            '<div class="' + col.headerCls + ' p-4 sm:p-5">' +
+            '<div class="flex items-start justify-between gap-2"><div class="min-w-0">' +
+            '<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full shrink-0 ' + col.dotCls + '"></span>' +
+            '<h3 class="font-bold text-base text-slate-900 truncate">' + escHtml(v.name) + '</h3></div>' +
+            '<p class="text-xs text-slate-600 mt-1 truncate">' + escHtml(drvTxt) + ' • <span class="font-mono">' + escHtml(plateTxt) + '</span></p></div>' +
+            '<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 tabular-nums shrink-0">' + telemetry.length + ' tappe</span></div>' +
+            '<div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-200/70 text-center tabular-nums">' +
+            '<div class="bg-white rounded-xl py-1.5 px-2"><div class="text-[10px] font-semibold uppercase text-slate-400">Km Giro</div><div class="text-xs font-bold text-slate-800">' + totalKm + ' km</div></div>' +
+            '<div class="bg-white rounded-xl py-1.5 px-2"><div class="text-[10px] font-semibold uppercase text-slate-400">Picco a Bordo</div><div class="text-xs font-bold ' + (overAny ? 'text-red-600' : 'text-slate-800') + '">' + peak.toLocaleString('it-IT') + ' kg</div></div>' +
+            '</div></div>' +
+
+            '<div class="p-4 sm:p-5 space-y-4">' +
+            '<div><div class="flex justify-between text-xs mb-1 tabular-nums"><span class="text-slate-500">Portata massima lungo il giro</span>' +
+            '<span class="font-bold ' + (overAny ? 'text-red-600' : 'text-slate-800') + '">' + peakPct + '% / ' + Number(v.maxWeight).toLocaleString('it-IT') + ' kg</span></div>' +
+            '<div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ' + barColor + ' rounded-full" style="width:' + peakPct + '%"></div></div>' +
+            (overAny ? '<p class="text-[11px] font-bold text-red-600 mt-1">⚠ Sovraccarico intermedio: riordina le tappe.</p>' : '') + '</div>' +
+
+            '<div class="relative space-y-2.5 before:content-[\'\'] before:absolute before:left-[9px] before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">' +
+            (depotAddr
+              ? '<div class="relative pl-7 flex items-center justify-between text-xs py-1">' +
+                '<span class="absolute left-0 w-5 h-5 rounded-full btn-accent text-[10px] font-extrabold flex items-center justify-center">P</span>' +
+                '<span class="font-semibold text-slate-700 truncate pr-2" title="' + escHtml(depotAddr) + '">Partenza: ' + escHtml(depotAddr) + '</span>' +
+                '<span class="font-bold text-slate-600 tabular-nums shrink-0">' + initialWeight.toLocaleString('it-IT') + ' kg</span></div>'
+              : '<div class="relative pl-7 flex items-center justify-between text-xs py-1">' +
+                '<span class="absolute left-0 w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold flex items-center justify-center">P</span>' +
+                '<button type="button" data-action="open-brand-modal" class="text-xs font-semibold text-blue-600 hover:underline cursor-pointer">+ Imposta indirizzo sede partenza</button>' +
+                '<span class="font-bold text-slate-600 tabular-nums shrink-0">' + initialWeight.toLocaleString('it-IT') + ' kg</span></div>') +
+            stopsListHtml +
+            (depotAddr
+              ? '<div class="relative pl-7 flex items-center justify-between text-xs py-1">' +
+                '<span class="absolute left-0 w-5 h-5 rounded-full bg-slate-700 text-white text-[10px] font-extrabold flex items-center justify-center">R</span>' +
+                '<span class="font-semibold text-slate-700 truncate pr-2" title="' + escHtml(depotAddr) + '">Rientro: ' + escHtml(depotAddr) + '</span>' +
+                '<span class="font-bold text-slate-600 tabular-nums shrink-0">' + running.toLocaleString('it-IT') + ' kg</span></div>'
+              : '') +
+            '</div></div></div>' +
+
+            '<div class="p-4 pt-0">' +
+            '<a href="' + fullMapsUrl + '" target="_blank" rel="noopener noreferrer" ' +
+            'class="btn-primary w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-xs">' +
+            '<span>Apri Giro Completo su Google Maps ↗</span></a></div></div>';
+        }).join('');
+
+        return '<div class="space-y-6">' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
+          '<div><h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Giro Tappe &amp; Google Maps</h1>' +
+          '<p class="text-sm text-slate-500 mt-0.5">' + formatDateCompact(state.selectedDate) + ' • Sequenza fermate, peso sul cassone e itinerario multi-tappa</p></div>' +
+          '<button type="button" data-action="go-step" data-step="4" class="btn-accent px-4 py-2 rounded-xl text-xs font-semibold shadow-xs self-start sm:self-auto cursor-pointer">Avvia Viaggi &amp; Terzisti →</button>' +
+          '</div>' +
+          '<div class="flex overflow-x-auto lg:grid lg:grid-cols-3 gap-5 pb-2 snap-x">' + colsHtml + '</div></div>';
+      }
+
+      // =======================================================================
+      // STEP 4: VIAGGI & TERZISTI
+      // =======================================================================
+
+      function renderStep4() {
+        var closed = isDayClosed(state.selectedDate);
+        var dayTrips = state.trips.filter(function (t) { return t.date === state.selectedDate; });
+
+        var tripsHtml = dayTrips.length === 0
+          ? '<div class="app-card p-10 text-center space-y-3">' +
+            '<div class="text-sm font-bold text-slate-800">Nessun viaggio attivo per ' + formatDateCompact(state.selectedDate) + '</div>' +
+            '<p class="text-xs text-slate-500">Quando completerai un viaggio di tipo <strong>Invio Conto Lavoro</strong>, il lotto comparirà automaticamente nel registro terzisti qui accanto.</p>' +
+            (closed ? '' : '<div><button type="button" data-action="open-new-trip" class="btn-primary px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">+ Nuovo Viaggio</button></div>') +
+            '</div>'
+          : dayTrips.map(function (t) {
+            var v = getVehicle(t.vehicleId);
+            var col = getVehicleColor(v);
+            var drv = getDriver(t.driverId);
+            var fb = getFlowBadge(t.type);
+            var btns = closed ? '' :
+              '<div class="flex items-center gap-2 pt-2.5 border-t border-slate-100">' +
+              '<button type="button" data-action="mark-completed" data-id="' + escHtml(t.id) + '" ' +
+              'class="px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ' +
+              (t.status === 'Completato' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100') + '">✓ Completato</button>' +
+              '<button type="button" data-action="open-anomaly" data-id="' + escHtml(t.id) + '" ' +
+              'class="px-3.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ' +
+              (t.status === 'Anomalia' ? 'bg-red-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-red-50 hover:text-red-700') + '">! Anomalia</button></div>';
+
+            return '<div class="app-card ' + fb.border + ' p-4 sm:p-5 space-y-3">' +
+              '<div class="flex items-start justify-between gap-3"><div class="space-y-1">' +
+              '<div class="flex flex-wrap items-center gap-2">' + fb.pill +
+              '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ' + col.badgeCls + '">' + escHtml(v ? v.name : '-') + '</span>' +
+              '<span class="text-xs font-mono text-slate-400">' + escHtml(t.ddtNumber) + '</span></div>' +
+              '<div class="text-sm font-bold text-slate-900">' + escHtml(t.companyName) + '</div>' +
+              '<div class="text-xs text-slate-500 tabular-nums">' + escHtml(t.description) + ' • <strong>' + t.pallets + ' colli</strong> (' + Number(t.weight).toLocaleString('it-IT') + ' kg) • Autista: ' + escHtml(drv ? drv.name : 'Non assegnato') + '</div>' +
+              '</div>' + getStatusBadge(t.status) + '</div>' +
+              (t.anomalyNote ? '<div class="px-3.5 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-medium"><strong>Nota anomalia:</strong> ' + escHtml(t.anomalyNote) + '</div>' : '') +
+              btns + '</div>';
+          }).join('');
+
+        var lotsHtml = state.subcontractStock.length === 0
+          ? '<div class="py-8 px-4 text-center space-y-1.5 bg-slate-50 rounded-xl border border-dashed border-slate-200">' +
+            '<div class="text-xs font-bold text-slate-700">Nessun materiale fuori sede</div>' +
+            '<p class="text-[11px] text-slate-500">I lotti inviati in conto lavoro e segnati come completati compaiono qui con il tasto per prenotare il rientro.</p>' +
+            '</div>'
+          : state.subcontractStock.map(function (lot) {
+            var isLate = lot.expectedReturnDate < state.selectedDate;
+            return '<div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">' +
+              '<div class="flex items-start justify-between gap-2"><div>' +
+              '<div class="text-sm font-bold text-slate-900">' + escHtml(lot.companyName) + '</div>' +
+              '<div class="text-xs text-slate-600 mt-0.5">' + escHtml(lot.processType) + '</div>' +
+              '<div class="text-[11px] text-slate-500 mt-0.5 tabular-nums">' + escHtml(lot.ddtOut) + ' • ' + lot.pallets + ' colli (' + Number(lot.weight).toLocaleString('it-IT') + ' kg)</div></div>' +
+              (isLate
+                ? '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-red-700 border border-red-200 shrink-0">Scaduto</span>'
+                : '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">C/Lavoro</span>') +
+              '</div>' +
+              '<div class="flex items-center justify-between text-xs pt-2 border-t border-slate-200">' +
+              '<span class="text-slate-500 tabular-nums">Rientro previsto: <strong class="text-slate-800">' + formatDateIt(lot.expectedReturnDate) + '</strong></span>' +
+              '<button type="button" data-action="book-return-tomorrow" data-id="' + escHtml(lot.id) + '" ' +
+              'class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 cursor-pointer">+ Prenota Rientro Domani</button>' +
+              '</div></div>';
+          }).join('');
+
+        return '<div class="space-y-6">' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
+          '<div><h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Esecuzione Viaggi &amp; Terzisti</h1>' +
+          '<p class="text-sm text-slate-500 mt-0.5">' + formatDateCompact(state.selectedDate) + ' • Avanzamento ritiri/consegne e giacenze presso terzisti</p></div>' +
+          '<button type="button" data-action="go-step" data-step="5" class="btn-accent px-4 py-2 rounded-xl text-xs font-semibold shadow-xs self-start sm:self-auto cursor-pointer">Vai a Chiusura Giornata →</button>' +
+          '</div>' +
+          '<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">' +
+          '<div class="lg:col-span-7 space-y-3"><h2 class="text-sm font-bold text-slate-800">Avanzamento tappe del giorno (' + dayTrips.length + ')</h2>' + tripsHtml + '</div>' +
+          '<div class="lg:col-span-5 app-card p-5 space-y-4 self-start">' +
+          '<div class="flex items-center justify-between pb-2 border-b border-slate-100">' +
+          '<div><h2 class="text-sm font-bold text-slate-900">Conto Lavoro presso Terzisti</h2><p class="text-xs text-slate-500">Materiale attualmente fuori sede</p></div>' +
+          '<span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 tabular-nums">' + state.subcontractStock.length + ' lotti</span></div>' +
+          '<div class="space-y-3">' + lotsHtml + '</div></div></div></div>';
+      }
+
+      // =======================================================================
+      // STEP 5: CHIUSURA GIORNATA
+      // =======================================================================
+
+      function renderStep5() {
+        var closed = isDayClosed(state.selectedDate);
+        var noteVal = getDayNote(state.selectedDate);
+        var dayTrips = state.trips.filter(function (t) { return t.date === state.selectedDate; });
+        var completed = dayTrips.filter(function (t) { return t.status === 'Completato'; });
+        var totalPallets = dayTrips.reduce(function (s, t) { return s + (Number(t.pallets) || 1); }, 0);
+        var totalWeight = dayTrips.reduce(function (s, t) { return s + (Number(t.weight) || 0); }, 0);
+        var totalKm = 0;
+
+        var rowsVeh = state.vehicles.map(function (v) {
+          var col = getVehicleColor(v);
+          var vt = dayTrips.filter(function (t) { return t.vehicleId === v.id; });
+          var drv = getDriver(v.defaultDriverId);
+          var km = vt.length > 0 ? vt.reduce(function (s, t) { return s + (Number(t.km) || 20); }, 0) + ((state.brand.depotAddress || '').trim() ? 15 : 0) : 0;
+          var weight = vt.reduce(function (s, t) { return s + (Number(t.weight) || 0); }, 0);
+          totalKm += km;
+          return '<div class="py-3.5 flex items-center justify-between text-sm">' +
+            '<div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full ' + col.dotCls + '"></span>' +
+            '<div><div class="font-bold text-slate-900">' + escHtml(v.name) + '</div>' +
+            '<div class="text-xs text-slate-500">' + escHtml(drv ? drv.name : 'Autista non assegnato') + (v.plate ? (' • ' + escHtml(v.plate)) : '') + '</div></div></div>' +
+            '<div class="text-right text-xs tabular-nums"><div class="font-bold text-slate-900">' +
+            vt.filter(function (t) { return t.status === 'Completato'; }).length + '/' + vt.length + ' viaggi • ' + weight.toLocaleString('it-IT') + ' kg</div>' +
+            '<div class="text-slate-500">' + km + ' km stimati</div></div></div>';
+        }).join('');
+
+        var nextDt = parseIso(state.selectedDate);
+        nextDt.setDate(nextDt.getDate() + 1);
+        var nextIso = toIso(nextDt);
+
+        return '<div class="space-y-6">' +
+          '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">' +
+          '<div><h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">Chiusura Giornata &amp; Prepara Domani</h1>' +
+          '<p class="text-sm text-slate-500 mt-0.5">' + formatDateCompact(state.selectedDate) + ' • Riepilogo consuntivo e passaggio al giorno successivo</p></div>' +
+          '<div class="flex items-center gap-2 no-print">' +
+          '<button type="button" data-action="print-report" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer">Esporta / Stampa Riepilogo</button>' +
+          (closed ? '<button type="button" data-action="reopen-day" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 cursor-pointer">Riapri Giornata</button>' : '') +
+          '</div></div>' +
+
+          '<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 tabular-nums">' +
+          '<div class="app-card p-5"><div class="text-xs font-semibold text-slate-500">Viaggi Completati</div>' +
+          '<div class="text-2xl font-extrabold text-slate-900 mt-1.5">' + completed.length + ' <span class="text-sm font-medium text-slate-400">/ ' + dayTrips.length + '</span></div></div>' +
+          '<div class="app-card p-5"><div class="text-xs font-semibold text-slate-500">Colli Movimentati</div>' +
+          '<div class="text-2xl font-extrabold text-slate-900 mt-1.5">' + totalPallets + ' <span class="text-sm font-medium text-slate-400">colli</span></div></div>' +
+          '<div class="app-card p-5"><div class="text-xs font-semibold text-slate-500">Peso Totale</div>' +
+          '<div class="text-2xl font-extrabold text-slate-900 mt-1.5">' + totalWeight.toLocaleString('it-IT') + ' <span class="text-sm font-medium text-slate-400">kg</span></div></div>' +
+          '<div class="app-card p-5"><div class="text-xs font-semibold text-slate-500">Km Stimati</div>' +
+          '<div class="text-2xl font-extrabold text-slate-900 mt-1.5">' + totalKm + ' <span class="text-sm font-medium text-slate-400">km</span></div></div>' +
+          '</div>' +
+
+          '<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">' +
+          '<div class="lg:col-span-6 app-card p-5 space-y-3"><h2 class="text-sm font-bold text-slate-900">Consuntivo per veicolo</h2>' +
+          '<div class="divide-y divide-slate-100">' + rowsVeh + '</div></div>' +
+
+          '<div class="lg:col-span-6 app-card p-5 flex flex-col justify-between space-y-4">' +
+          '<div class="space-y-2"><label class="block text-sm font-bold text-slate-900">Note chiusura giornata</label>' +
+          '<textarea id="closing-notes-input" rows="3" ' + (closed ? 'disabled' : '') + ' placeholder="Annotazioni operative per il giorno successivo..." ' +
+          'class="w-full text-sm border border-slate-200 rounded-xl p-3 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500">' + escHtml(noteVal) + '</textarea></div>' +
+          '<button type="button" data-action="close-day-next" class="btn-primary w-full py-3.5 px-5 rounded-xl text-sm font-bold shadow-sm cursor-pointer no-print">' +
+          'Chiudi Giornata e Prepara Domani (' + formatDateIt(nextIso) + ') →</button></div></div></div>';
+      }
+
+      // =======================================================================
+      // MODALE RUBRICA AZIENDE MEMORIZZATE
+      // =======================================================================
+
+      function openCompaniesModal() {
+        resetCompanyForm();
+        companySearchQuery = '';
+        var sInput = document.getElementById('companies-search');
+        if (sInput) sInput.value = '';
+        renderCompaniesList();
+        document.getElementById('modal-companies').classList.remove('hidden');
+      }
+
+      function closeCompaniesModal() {
+        document.getElementById('modal-companies').classList.add('hidden');
+      }
+
+      function resetCompanyForm() {
+        document.getElementById('fc-id').value = '';
+        document.getElementById('fc-name').value = '';
+        document.getElementById('fc-category').value = 'Terzista Conto Lavoro';
+        document.getElementById('fc-address').value = '';
+        document.getElementById('fc-contact').value = '';
+        document.getElementById('fc-notes').value = '';
+        document.getElementById('fc-form-title').textContent = 'Aggiungi Nuova Azienda';
+        document.getElementById('fc-submit-btn').textContent = 'Salva in Rubrica';
+        document.getElementById('fc-cancel-edit').classList.add('hidden');
+      }
+
+      function renderCompaniesList() {
+        var container = document.getElementById('companies-list-container');
+        var countEl = document.getElementById('companies-list-count');
+        if (!container) return;
+
+        var q = companySearchQuery.toLowerCase().trim();
+        var filtered = state.companies.filter(function (c) {
+          if (!q) return true;
+          return (c.name || '').toLowerCase().indexOf(q) !== -1 ||
+            (c.address || '').toLowerCase().indexOf(q) !== -1 ||
+            (c.category || '').toLowerCase().indexOf(q) !== -1 ||
+            (c.notes || '').toLowerCase().indexOf(q) !== -1;
+        });
+
+        if (countEl) {
+          countEl.textContent = 'Aziende memorizzate (' + filtered.length + ' / ' + state.companies.length + ')';
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = '<div class="app-card p-8 text-center text-xs text-slate-500">Nessuna azienda in rubrica. Compila il modulo qui sopra per memorizzarne una nuova.</div>';
+          return;
+        }
+
+        container.innerHTML = filtered.map(function (c) {
+          var catBadge = 'bg-amber-50 text-amber-800 border-amber-200';
+          if (c.category === 'Fornitore Materiale') catBadge = 'bg-blue-50 text-blue-700 border-blue-200';
+          else if (c.category === 'Cliente / Destinatario') catBadge = 'bg-purple-50 text-purple-700 border-purple-200';
+
+          return '<div class="app-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">' +
+            '<div class="space-y-1 min-w-0 flex-1">' +
+            '<div class="flex flex-wrap items-center gap-2">' +
+            '<span class="font-bold text-sm text-slate-900">' + escHtml(c.name) + '</span>' +
+            '<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold border ' + catBadge + '">' + escHtml(c.category) + '</span>' +
+            '</div>' +
+            '<div class="text-xs text-slate-600">' + escHtml(c.address) + '</div>' +
+            (c.contact || c.notes
+              ? '<div class="text-[11px] text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5">' +
+                (c.contact ? '<span><strong>Ref:</strong> ' + escHtml(c.contact) + '</span>' : '') +
+                (c.notes ? '<span><strong>Note:</strong> ' + escHtml(c.notes) + '</span>' : '') +
+                '</div>'
+              : '') +
+            '</div>' +
+            '<div class="flex flex-wrap items-center gap-1.5 shrink-0">' +
+            '<button type="button" data-action="quick-trip-company" data-id="' + escHtml(c.id) + '" ' +
+            'class="btn-accent px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer">+ Viaggio rapido</button>' +
+            '<button type="button" data-action="edit-company" data-id="' + escHtml(c.id) + '" ' +
+            'class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">Modifica</button>' +
+            '<button type="button" data-action="delete-company" data-id="' + escHtml(c.id) + '" ' +
+            'class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer">Elimina</button>' +
+            '</div></div>';
+        }).join('');
+      }
+
+      function upsertCompanyInBook(name, address, category, contact, notes) {
+        var cleanName = (name || '').trim();
+        var cleanAddr = (address || '').trim();
+        if (!cleanName || !cleanAddr) return;
+        var existing = state.companies.find(function (c) {
+          return c.name.toLowerCase() === cleanName.toLowerCase();
+        });
+        if (existing) {
+          existing.address = cleanAddr;
+          if (category) existing.category = category;
+          if (contact) existing.contact = contact;
+          if (notes) existing.notes = notes;
+        } else {
+          state.companies.unshift({
+            id: 'AZ-' + Math.floor(100 + Math.random() * 899),
+            name: cleanName,
+            category: category || 'Terzista Conto Lavoro',
+            address: cleanAddr,
+            contact: contact || '',
+            notes: notes || ''
+          });
+        }
+      }
+
+      // =======================================================================
+      // MODALE NUOVO / MODIFICA VIAGGIO
+      // =======================================================================
+
+      function populateTripModalSelects() {
+        var presetSel = document.getElementById('ft-company-preset');
+        presetSel.innerHTML = '<option value="">-- Seleziona un\'azienda memorizzata (' + state.companies.length + ') oppure compila sotto --</option>' +
+          state.companies.map(function (c) {
+            return '<option value="' + escHtml(c.id) + '">' + escHtml(c.name) + ' (' + escHtml(c.category) + ')</option>';
+          }).join('');
+
+        var vehSel = document.getElementById('ft-vehicle');
+        vehSel.innerHTML = '<option value="auto">Automatico (Consigliato)</option>' +
+          state.vehicles.map(function (v) {
+            return '<option value="' + escHtml(v.id) + '">' + escHtml(v.name) + ' (' + Number(v.maxWeight).toLocaleString('it-IT') + ' kg / ' + v.maxVolume + ' m³)</option>';
+          }).join('');
+
+        var drvSel = document.getElementById('ft-driver');
+        drvSel.innerHTML = '<option value="auto">Titolare del veicolo (se assegnato)</option>' +
+          state.drivers.map(function (d) {
+            return '<option value="' + escHtml(d.id) + '">' + escHtml(d.name) + ' (' + driverLicenseLabel(d) + ')</option>';
+          }).join('');
+      }
+
+      function applyCompanyToTripForm(company) {
+        if (!company) return;
+        document.getElementById('ft-company').value = company.name;
+        document.getElementById('ft-address').value = company.address;
+        var hint = document.getElementById('ft-company-note-hint');
+        if (company.notes || company.contact) {
+          hint.textContent = [company.contact ? ('Ref: ' + company.contact) : '', company.notes ? ('Note: ' + company.notes) : ''].filter(Boolean).join(' • ');
+          hint.classList.remove('hidden');
+        } else {
+          hint.textContent = '';
+          hint.classList.add('hidden');
+        }
+
+        var typeSel = document.getElementById('ft-type');
+        var causeSel = document.getElementById('ft-cause');
+        if (company.category === 'Fornitore Materiale') {
+          typeSel.value = 'Ritiro Materiale';
+          causeSel.value = 'Acquisto';
+        } else if (company.category === 'Cliente / Destinatario') {
+          typeSel.value = 'Consegna / Reso';
+          causeSel.value = 'C/Vendita';
+        } else {
+          typeSel.value = 'Invio Conto Lavoro';
+          causeSel.value = 'C/Lavorazione';
+        }
+      }
+
+      function openTripModal(tripId, preselectedCompanyId) {
+        if (isDayClosed(state.selectedDate)) {
+          showToast('Giornata chiusa: riaprila nello Step 5 per modificare.', 'error');
+          return;
+        }
+        populateTripModalSelects();
+        var existing = tripId ? state.trips.find(function (t) { return t.id === tripId; }) : null;
+        document.getElementById('modal-trip-title').textContent = existing ? 'Modifica Viaggio' : 'Nuovo Viaggio';
+        document.getElementById('modal-trip-sub').textContent = 'Data: ' + formatDateIt(existing ? existing.date : state.selectedDate);
+
+        var nextNum = String(state.trips.length + 1).padStart(3, '0');
+        document.getElementById('ft-id').value = existing ? existing.id : '';
+        document.getElementById('ft-date').value = existing ? existing.date : state.selectedDate;
+        document.getElementById('ft-type').value = existing ? existing.type : 'Invio Conto Lavoro';
+        document.getElementById('ft-cause').value = existing ? existing.ddtCause : 'C/Lavorazione';
+        document.getElementById('ft-ddt').value = existing ? existing.ddtNumber : ('DDT-CL/' + nextNum);
+        document.getElementById('ft-company').value = existing ? existing.companyName : '';
+        document.getElementById('ft-address').value = existing ? existing.address : '';
+        document.getElementById('ft-desc').value = existing ? existing.description : '';
+        document.getElementById('ft-pallets').value = existing ? existing.pallets : 1;
+        document.getElementById('ft-weight').value = existing ? existing.weight : '';
+        document.getElementById('ft-volume').value = existing ? existing.volume : '';
+        document.getElementById('ft-km').value = existing ? (existing.km || 20) : 20;
+        document.getElementById('ft-taillift').checked = existing ? Boolean(existing.needsTailLift) : false;
+        document.getElementById('ft-vehicle').value = existing ? existing.vehicleId : 'auto';
+        document.getElementById('ft-driver').value = existing ? (existing.driverId || 'auto') : 'auto';
+        document.getElementById('ft-save-company').checked = true;
+
+        var hint = document.getElementById('ft-company-note-hint');
+        hint.textContent = '';
+        hint.classList.add('hidden');
+
+        if (preselectedCompanyId) {
+          document.getElementById('ft-company-preset').value = preselectedCompanyId;
+          var comp = state.companies.find(function (c) { return c.id === preselectedCompanyId; });
+          applyCompanyToTripForm(comp);
+        }
+
+        document.getElementById('modal-trip').classList.remove('hidden');
+        validateTripForm();
+      }
+
+      function validateTripForm() {
+        var editId = document.getElementById('ft-id').value || null;
+        var dateStr = document.getElementById('ft-date').value || state.selectedDate;
+        var w = Number(document.getElementById('ft-weight').value) || 0;
+        var vol = Number(document.getElementById('ft-volume').value) || 0;
+        var tailLift = document.getElementById('ft-taillift').checked;
+        var vChoice = document.getElementById('ft-vehicle').value;
+        var dChoice = document.getElementById('ft-driver').value;
+        var box = document.getElementById('ft-validation-msg');
+        var btn = document.getElementById('ft-submit-btn');
+
+        var suggested = recommendVehicle(w, vol, tailLift, dateStr, editId);
+        var veh = vChoice === 'auto' ? suggested : getVehicle(vChoice);
+        var drvId = dChoice === 'auto' ? (veh.defaultDriverId || '') : dChoice;
+        var drv = getDriver(drvId);
+        var load = getVehicleDayLoad(veh.id, dateStr, editId);
+        var cDrv = getFirstCDriver();
+
+        if (veh.requiredLicense === 'C' && drv && drv.license !== 'C') {
+          box.className = 'p-3.5 rounded-xl text-xs bg-red-50 text-red-800 border border-red-200 font-semibold';
+          box.textContent = 'Blocco Patente: ' + drv.name + ' ha Patente B. Solo un autista con Patente C + CQC' +
+            (cDrv ? (' (es. ' + cDrv.name + ')') : '') + ' può guidare ' + veh.name + '.';
+          btn.disabled = true;
+          btn.classList.add('opacity-40');
+          return null;
+        }
+        if (tailLift && !veh.tailLift) {
+          box.className = 'p-3.5 rounded-xl text-xs bg-red-50 text-red-800 border border-red-200 font-semibold';
+          box.textContent = 'Sponda idraulica richiesta: ' + veh.name + ' non dispone di sponda idraulica.';
+          btn.disabled = true;
+          btn.classList.add('opacity-40');
+          return null;
+        }
+        if (w > 0 && load.totalWeight + w > Number(veh.maxWeight)) {
+          box.className = 'p-3.5 rounded-xl text-xs bg-red-50 text-red-800 border border-red-200 font-semibold';
+          box.textContent = 'Portata superata su ' + veh.name + ': ' + (load.totalWeight + w).toLocaleString('it-IT') + ' kg su ' + Number(veh.maxWeight).toLocaleString('it-IT') + ' kg.';
+          btn.disabled = true;
+          btn.classList.add('opacity-40');
+          return null;
+        }
+        if (vol > 0 && load.totalVolume + vol > Number(veh.maxVolume)) {
+          box.className = 'p-3.5 rounded-xl text-xs bg-red-50 text-red-800 border border-red-200 font-semibold';
+          box.textContent = 'Volume superato su ' + veh.name + ': ' + (load.totalVolume + vol).toFixed(1) + ' m³ su ' + veh.maxVolume + ' m³.';
+          btn.disabled = true;
+          btn.classList.add('opacity-40');
+          return null;
+        }
+
+        var drvInfo = drv ? (drv.name + ' (' + driverLicenseLabel(drv) + ')') : 'Nessun autista ancora configurato';
+        box.className = 'p-3.5 rounded-xl text-xs bg-blue-50 text-blue-900 border border-blue-200';
+        box.innerHTML = 'Veicolo: <strong>' + escHtml(veh.name) + '</strong>' + (veh.plate ? (' (' + escHtml(veh.plate) + ')') : '') + ' • Autista: <strong>' + escHtml(drvInfo) + '</strong>';
+        btn.disabled = false;
+        btn.classList.remove('opacity-40');
+        return { veh: veh, drv: drv };
+      }
+
+      // =======================================================================
+      // MODALE MEZZI & AUTISTI (COMPLETAMENTE MODIFICABILE DA ZERO)
+      // =======================================================================
+
+      function renderFleetModal() {
+        var tabFleet = document.getElementById('tab-fleet-btn');
+        var tabDrv = document.getElementById('tab-drivers-btn');
+        var body = document.getElementById('modal-fleet-body');
+
+        tabFleet.textContent = 'Flotta Mezzi (' + state.vehicles.length + ')';
+        tabFleet.className = 'px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ' + (state.fleetModalTab === 'fleet' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600');
+        tabDrv.textContent = 'Autisti (' + state.drivers.length + ')';
+        tabDrv.className = 'px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ' + (state.fleetModalTab === 'drivers' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600');
+
+        if (state.fleetModalTab === 'fleet') {
+          var colorOptionsHtml = Object.keys(VEHICLE_COLORS).map(function (k) {
+            return '<option value="' + k + '">' + VEHICLE_COLORS[k].label + '</option>';
+          }).join('');
+
+          var vehiclesCardsHtml = state.vehicles.map(function (v) {
+            var col = getVehicleColor(v);
+            var driverOpts = '<option value="">-- Nessun autista assegnato --</option>' +
+              state.drivers.map(function (d) {
+                return '<option value="' + escHtml(d.id) + '" ' + (v.defaultDriverId === d.id ? 'selected' : '') + '>' + escHtml(d.name) + ' (' + driverLicenseLabel(d) + ')</option>';
+              }).join('');
+
+            var colorSelHtml = Object.keys(VEHICLE_COLORS).map(function (k) {
+              return '<option value="' + k + '" ' + (v.colorKey === k ? 'selected' : '') + '>' + VEHICLE_COLORS[k].label + '</option>';
+            }).join('');
+
+            return '<div class="app-card overflow-hidden flex flex-col justify-between">' +
+              '<div class="' + col.headerCls + ' p-4 space-y-2.5">' +
+              '<div class="flex items-center justify-between gap-2">' +
+              '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase text-slate-600">' +
+              '<span class="w-2.5 h-2.5 rounded-full ' + col.dotCls + '"></span>Scheda Veicolo</span>' +
+              '<button type="button" data-action="delete-vehicle" data-id="' + escHtml(v.id) + '" ' +
+              'class="px-2 py-0.5 rounded-lg text-[11px] font-semibold text-red-600 bg-white/80 hover:bg-red-50 border border-red-200/70 cursor-pointer">Elimina</button>' +
+              '</div>' +
+              '<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">' +
+              '<div class="sm:col-span-2"><label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Nome / Modello Mezzo</label>' +
+              '<input type="text" data-veh-field="name" data-id="' + escHtml(v.id) + '" value="' + escHtml(v.name) + '" ' +
+              'class="w-full text-sm font-bold text-slate-900 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500" /></div>' +
+              '<div><label class="block text-[10px] font-bold uppercase text-slate-500 mb-0.5">Targa</label>' +
+              '<input type="text" data-veh-field="plate" data-id="' + escHtml(v.id) + '" value="' + escHtml(v.plate) + '" placeholder="AA 000 BB" ' +
+              'class="w-full text-xs font-mono font-bold text-slate-800 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 uppercase focus:outline-none focus:border-blue-500" /></div>' +
+              '</div></div>' +
+
+              '<div class="p-4 space-y-3">' +
+              '<div class="grid grid-cols-2 gap-2.5">' +
+              '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Portata max (kg)</label>' +
+              '<input type="number" min="100" max="40000" step="50" data-veh-field="maxWeight" data-id="' + escHtml(v.id) + '" value="' + Number(v.maxWeight) + '" ' +
+              'class="w-full text-xs font-bold tabular-nums border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500" /></div>' +
+              '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Volume utile (m³)</label>' +
+              '<input type="number" min="0.5" max="120" step="0.1" data-veh-field="maxVolume" data-id="' + escHtml(v.id) + '" value="' + Number(v.maxVolume) + '" ' +
+              'class="w-full text-xs font-bold tabular-nums border border-slate-200 rounded-xl px-2.5 py-1.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500" /></div>' +
+              '</div>' +
+
+              '<div class="grid grid-cols-2 gap-2.5">' +
+              '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Patente richiesta</label>' +
+              '<select data-veh-field="requiredLicense" data-id="' + escHtml(v.id) + '" class="w-full text-xs font-semibold border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white">' +
+              '<option value="B" ' + (v.requiredLicense !== 'C' ? 'selected' : '') + '>Patente B</option>' +
+              '<option value="C" ' + (v.requiredLicense === 'C' ? 'selected' : '') + '>Patente C + CQC</option>' +
+              '</select></div>' +
+              '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Colore scheda</label>' +
+              '<select data-veh-field="colorKey" data-id="' + escHtml(v.id) + '" class="w-full text-xs font-semibold border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white">' +
+              colorSelHtml + '</select></div>' +
+              '</div>' +
+
+              '<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 cursor-pointer">' +
+              '<input type="checkbox" data-veh-field="tailLift" data-id="' + escHtml(v.id) + '" ' + (v.tailLift ? 'checked' : '') + ' class="w-4 h-4 text-amber-600 rounded border-slate-300" />' +
+              '<span>Dotato di sponda idraulica</span>' +
+              '</label>' +
+
+              '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Autista titolare predefinito</label>' +
+              '<select data-veh-driver="' + escHtml(v.id) + '" class="w-full text-xs font-semibold border border-slate-200 rounded-xl px-2.5 py-2 bg-white">' +
+              driverOpts + '</select></div>' +
+              '</div></div>';
+          }).join('');
+
+          body.innerHTML = '<div class="space-y-5">' +
+            '<!-- Form aggiungi nuovo mezzo -->' +
+            '<form id="form-add-vehicle" class="app-card p-4 space-y-3">' +
+            '<div class="text-xs font-bold uppercase tracking-wider text-slate-600">+ Aggiungi Nuovo Mezzo alla Flotta</div>' +
+            '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">' +
+            '<div class="lg:col-span-2"><label class="block text-[11px] font-semibold text-slate-600 mb-1">Nome / Modello *</label>' +
+            '<input type="text" id="fv-new-name" required placeholder="Es. Iveco Daily / Motrice" class="w-full text-xs font-semibold border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" /></div>' +
+            '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Targa</label>' +
+            '<input type="text" id="fv-new-plate" placeholder="AA 000 BB" class="w-full text-xs font-mono uppercase border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" /></div>' +
+            '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Portata (kg) *</label>' +
+            '<input type="number" id="fv-new-weight" min="100" max="40000" value="1500" required class="w-full text-xs tabular-nums border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" /></div>' +
+            '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Volume (m³) *</label>' +
+            '<input type="number" id="fv-new-volume" min="0.5" max="120" step="0.1" value="10.0" required class="w-full text-xs tabular-nums border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" /></div>' +
+            '<div><label class="block text-[11px] font-semibold text-slate-600 mb-1">Patente</label>' +
+            '<select id="fv-new-license" class="w-full text-xs font-semibold border border-slate-200 rounded-xl px-2.5 py-2 bg-white">' +
+            '<option value="B">Patente B</option>' +
+            '<option value="C">Patente C + CQC</option>' +
+            '</select></div>' +
+            '</div>' +
+            '<div class="flex flex-wrap items-center justify-between gap-3 pt-1">' +
+            '<div class="flex flex-wrap items-center gap-4">' +
+            '<label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">' +
+            '<input type="checkbox" id="fv-new-taillift" class="w-4 h-4 text-amber-600 rounded border-slate-300" />' +
+            '<span>Con sponda idraulica</span></label>' +
+            '<div class="flex items-center gap-2"><span class="text-xs text-slate-500">Colore:</span>' +
+            '<select id="fv-new-color" class="text-xs font-semibold border border-slate-200 rounded-xl px-2.5 py-1.5 bg-white">' + colorOptionsHtml + '</select></div>' +
+            '</div>' +
+            '<button type="submit" class="btn-primary px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">+ Aggiungi Mezzo</button>' +
+            '</div></form>' +
+
+            '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">' + vehiclesCardsHtml + '</div>' +
+            '</div>';
+        } else {
+          var cDrivers = state.drivers.filter(function (d) { return d.license === 'C'; });
+          var cNames = cDrivers.length > 0
+            ? cDrivers.map(function (d) { return d.name; }).join(', ')
+            : 'Nessun autista C + CQC ancora inserito';
+
+          var driversListHtml = state.drivers.length === 0
+            ? '<div class="app-card p-8 text-center space-y-1.5">' +
+              '<div class="text-sm font-bold text-slate-800">Nessun autista configurato</div>' +
+              '<p class="text-xs text-slate-500">Inserisci qui sopra i nomi reali dei tuoi autisti indicando se possiedono Patente B oppure Patente C + CQC.</p>' +
+              '</div>'
+            : '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">' +
+              state.drivers.map(function (d) {
+                var isC = d.license === 'C';
+                return '<div class="app-card p-4 space-y-3">' +
+                  '<div class="flex items-center justify-between gap-2">' +
+                  '<input type="text" data-driver-name="' + escHtml(d.id) + '" value="' + escHtml(d.name) + '" ' +
+                  'class="flex-1 text-sm font-bold text-slate-900 border border-slate-200 rounded-xl px-3 py-1.5 bg-slate-50 focus:bg-white focus:outline-none focus:border-blue-500" />' +
+                  '<button type="button" data-action="delete-driver" data-id="' + escHtml(d.id) + '" title="Elimina autista" ' +
+                  'class="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 cursor-pointer shrink-0">Elimina</button>' +
+                  '</div>' +
+                  '<div class="flex items-center justify-between gap-2">' +
+                  '<span class="text-xs text-slate-500">Abilitazione patente:</span>' +
+                  '<select data-driver-license="' + escHtml(d.id) + '" class="text-xs font-semibold border rounded-xl px-3 py-1.5 ' +
+                  (isC ? 'bg-amber-50 text-amber-900 border-amber-200' : 'bg-slate-50 text-slate-700 border-slate-200') + '">' +
+                  '<option value="B" ' + (!isC ? 'selected' : '') + '>Patente B</option>' +
+                  '<option value="C" ' + (isC ? 'selected' : '') + '>Patente C + CQC</option>' +
+                  '</select>' +
+                  '</div></div>';
+              }).join('') +
+              '</div>';
+
+          body.innerHTML = '<div class="space-y-4">' +
+            '<div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed">' +
+            '<strong>Controllo Patente C + CQC:</strong> I mezzi che richiedono <strong>Patente C + CQC</strong> (es. Iveco Eurocargo) possono essere assegnati esclusivamente ad autisti abilitati C + CQC (' + escHtml(cNames) + ').' +
+            '</div>' +
+
+            '<!-- Form aggiungi nuovo autista -->' +
+            '<form id="form-add-driver" class="app-card p-4 flex flex-col sm:flex-row sm:items-end gap-3">' +
+            '<div class="flex-1"><label class="block text-xs font-semibold text-slate-600 mb-1">Nome e Cognome Autista *</label>' +
+            '<input type="text" id="fd-new-name" required placeholder="Inserisci nome e cognome" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500" /></div>' +
+            '<div class="sm:w-56"><label class="block text-xs font-semibold text-slate-600 mb-1">Abilitazione Patente</label>' +
+            '<select id="fd-new-license" class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-blue-500">' +
+            '<option value="B">Patente B (Furgoni)</option>' +
+            '<option value="C">Patente C + CQC (Anche Autocarri)</option>' +
+            '</select></div>' +
+            '<button type="submit" class="btn-primary px-4 py-2.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer">+ Aggiungi Autista</button>' +
+            '</form>' +
+            driversListHtml + '</div>';
+        }
+      }
+
+      // =======================================================================
+      // CENTRAL RENDER
+      // =======================================================================
+
+      function renderApp() {
+        renderHeader();
+        var main = document.getElementById('app-main');
+        if (!main) return;
+        if (state.currentStep === 1) main.innerHTML = renderStep1();
+        else if (state.currentStep === 2) main.innerHTML = renderStep2();
+        else if (state.currentStep === 3) main.innerHTML = renderStep3();
+        else if (state.currentStep === 4) main.innerHTML = renderStep4();
+        else main.innerHTML = renderStep5();
+      }
+
+      // =======================================================================
+      // GLOBAL EVENT DELEGATION (data-action / data-id)
+      // =======================================================================
+
+      document.addEventListener('click', function (e) {
+        var target = e.target.closest('[data-action]');
+        if (!target) return;
+        var action = target.getAttribute('data-action');
+
+        if (action === 'shift-date') {
+          var delta = Number(target.getAttribute('data-delta')) || 0;
+          var dt = parseIso(state.selectedDate);
+          dt.setDate(dt.getDate() + delta);
+          state.selectedDate = toIso(dt);
+          state.calendarRefDate = state.selectedDate;
+          saveState();
+          renderApp();
+        } else if (action === 'set-today') {
+          state.selectedDate = TODAY_ISO;
+          state.calendarRefDate = TODAY_ISO;
+          saveState();
+          renderApp();
+        } else if (action === 'set-tomorrow') {
+          state.selectedDate = TOMORROW_ISO;
+          state.calendarRefDate = TOMORROW_ISO;
+          saveState();
+          renderApp();
+        } else if (action === 'go-step') {
+          var step = Number(target.getAttribute('data-step'));
+          if (step >= 1 && step <= 5) {
+            state.currentStep = step;
+            saveState();
+            renderApp();
+            var pill = document.getElementById('step-btn-' + step);
+            if (pill) pill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        } else if (action === 'move-step') {
+          var sDelta = Number(target.getAttribute('data-delta')) || 0;
+          var nextStep = state.currentStep + sDelta;
+          if (nextStep >= 1 && nextStep <= 5) {
+            state.currentStep = nextStep;
+            saveState();
+            renderApp();
+            var sp = document.getElementById('step-btn-' + nextStep);
+            if (sp) sp.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          }
+        } else if (action === 'select-date') {
+          var iso = target.getAttribute('data-date');
+          if (iso) {
+            state.selectedDate = iso;
+            state.calendarRefDate = iso;
+            saveState();
+            renderApp();
+          }
+        } else if (action === 'shift-cal') {
+          var cDelta = Number(target.getAttribute('data-delta')) || 0;
+          var cRef = parseIso(state.calendarRefDate);
+          if (state.calendarMode === 'week') cRef.setDate(cRef.getDate() + cDelta * 7);
+          else cRef.setMonth(cRef.getMonth() + cDelta);
+          state.calendarRefDate = toIso(cRef);
+          saveState();
+          renderApp();
+        } else if (action === 'set-cal-mode') {
+          state.calendarMode = target.getAttribute('data-mode') || 'week';
+          saveState();
+          renderApp();
+        } else if (action === 'filter-step1-flow') {
+          state.step1FlowFilter = target.getAttribute('data-flow') || 'Tutti';
+          saveState();
+          renderApp();
+        } else if (action === 'filter-step2-veh') {
+          state.step2VehicleFilter = target.getAttribute('data-veh') || 'Tutti';
+          saveState();
+          renderApp();
+        } else if (action === 'open-new-trip') {
+          openTripModal(null, null);
+        } else if (action === 'edit-trip') {
+          openTripModal(target.getAttribute('data-id'), null);
+        } else if (action === 'close-trip-modal') {
+          document.getElementById('modal-trip').classList.add('hidden');
+        } else if (action === 'delete-trip') {
+          var delId = target.getAttribute('data-id');
+          if (!isDayClosed(state.selectedDate) && delId) {
+            state.trips = state.trips.filter(function (t) { return t.id !== delId; });
+            saveState();
+            showToast('Viaggio eliminato.');
+            renderApp();
+          }
+        } else if (action === 'open-companies-modal') {
+          openCompaniesModal();
+        } else if (action === 'close-companies-modal') {
+          closeCompaniesModal();
+        } else if (action === 'reset-company-form') {
+          resetCompanyForm();
+        } else if (action === 'edit-company') {
+          var cId = target.getAttribute('data-id');
+          var comp = state.companies.find(function (c) { return c.id === cId; });
+          if (comp) {
+            document.getElementById('fc-id').value = comp.id;
+            document.getElementById('fc-name').value = comp.name;
+            document.getElementById('fc-category').value = comp.category;
+            document.getElementById('fc-address').value = comp.address;
+            document.getElementById('fc-contact').value = comp.contact || '';
+            document.getElementById('fc-notes').value = comp.notes || '';
+            document.getElementById('fc-form-title').textContent = 'Modifica Azienda: ' + comp.name;
+            document.getElementById('fc-submit-btn').textContent = 'Aggiorna Azienda';
+            document.getElementById('fc-cancel-edit').classList.remove('hidden');
+          }
+        } else if (action === 'delete-company') {
+          var delCompId = target.getAttribute('data-id');
+          state.companies = state.companies.filter(function (c) { return c.id !== delCompId; });
+          saveState();
+          renderCompaniesList();
+          renderHeader();
+          showToast('Azienda rimossa dalla rubrica.');
+        } else if (action === 'quick-trip-company') {
+          var qCompId = target.getAttribute('data-id');
+          closeCompaniesModal();
+          openTripModal(null, qCompId);
+        } else if (action === 'move-stop') {
+          if (isDayClosed(state.selectedDate)) return;
+          var vehId = target.getAttribute('data-veh');
+          var tId = target.getAttribute('data-id');
+          var dir = target.getAttribute('data-dir');
+          var stops = state.trips
+            .filter(function (t) { return t.vehicleId === vehId && t.date === state.selectedDate; })
+            .sort(function (a, b) { return (a.stopOrder || 0) - (b.stopOrder || 0); });
+          var idx = stops.findIndex(function (t) { return t.id === tId; });
+          var swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+          if (idx !== -1 && swapIdx >= 0 && swapIdx < stops.length) {
+            var copy = stops.slice();
+            var tmp = copy[idx];
+            copy[idx] = copy[swapIdx];
+            copy[swapIdx] = tmp;
+            copy.forEach(function (item, i) {
+              var orig = state.trips.find(function (t) { return t.id === item.id; });
+              if (orig) orig.stopOrder = i + 1;
+            });
+            saveState();
+            renderApp();
+          }
+        } else if (action === 'mark-completed') {
+          if (isDayClosed(state.selectedDate)) return;
+          var mId = target.getAttribute('data-id');
+          var trip = state.trips.find(function (t) { return t.id === mId; });
+          if (trip) {
+            var prevSt = trip.status;
+            trip.status = 'Completato';
+            trip.anomalyNote = '';
+            if (prevSt !== 'Completato') {
+              if (trip.type === 'Invio Conto Lavoro') {
+                var exists = state.subcontractStock.some(function (l) { return l.ddtOut === trip.ddtNumber; });
+                if (!exists) {
+                  var retD = parseIso(trip.date);
+                  retD.setDate(retD.getDate() + 4);
+                  state.subcontractStock.unshift({
+                    id: 'LOT-' + Math.floor(100 + Math.random() * 899),
+                    companyName: trip.companyName,
+                    processType: trip.description,
+                    address: trip.address,
+                    ddtOut: trip.ddtNumber,
+                    expectedReturnDate: toIso(retD),
+                    materialDesc: trip.pallets + ' colli (' + trip.weight + ' kg)',
+                    pallets: trip.pallets || 1,
+                    weight: trip.weight,
+                    volume: trip.volume,
+                    needsTailLift: trip.needsTailLift
+                  });
+                }
+                showToast('Invio completato e registrato nelle giacenze presso terzisti.');
+              } else if (trip.type === 'Rientro Conto Lavoro') {
+                if (trip.externalLotId) {
+                  state.subcontractStock = state.subcontractStock.filter(function (l) { return l.id !== trip.externalLotId; });
+                } else {
+                  var lIdx = state.subcontractStock.findIndex(function (l) { return l.companyName === trip.companyName; });
+                  if (lIdx !== -1) state.subcontractStock.splice(lIdx, 1);
+                }
+                showToast('Rientro completato e scaricato dal registro terzisti.');
+              } else {
+                showToast('Viaggio segnato come completato.');
+              }
+            }
+            saveState();
+            renderApp();
+          }
+        } else if (action === 'open-anomaly') {
+          if (isDayClosed(state.selectedDate)) return;
+          var aId = target.getAttribute('data-id');
+          var aTrip = state.trips.find(function (t) { return t.id === aId; });
+          if (aTrip) {
+            document.getElementById('ma-id').value = aTrip.id;
+            document.getElementById('ma-sub').textContent = aTrip.companyName + ' • ' + aTrip.ddtNumber;
+            document.getElementById('ma-note').value = aTrip.anomalyNote || '';
+            document.getElementById('modal-anomaly').classList.remove('hidden');
+          }
+        } else if (action === 'close-anomaly-modal') {
+          document.getElementById('modal-anomaly').classList.add('hidden');
+        } else if (action === 'book-return-tomorrow') {
+          var lotId = target.getAttribute('data-id');
+          var lot = state.subcontractStock.find(function (l) { return l.id === lotId; });
+          if (lot) {
+            var nextD = parseIso(state.selectedDate);
+            nextD.setDate(nextD.getDate() + 1);
+            var tomIso = toIso(nextD);
+            var bestV = recommendVehicle(lot.weight, lot.volume, lot.needsTailLift, tomIso, null);
+            var cnt = state.trips.filter(function (t) { return t.date === tomIso && t.vehicleId === bestV.id; }).length;
+            state.trips.push({
+              id: 'VG-' + Math.floor(100 + Math.random() * 899),
+              date: tomIso,
+              stopOrder: cnt + 1,
+              km: 20,
+              type: 'Rientro Conto Lavoro',
+              ddtNumber: 'RIENTRO/' + lot.ddtOut,
+              ddtCause: 'C/Lavorazione',
+              companyName: lot.companyName,
+              address: lot.address,
+              description: lot.processType + ' — ' + lot.materialDesc,
+              pallets: lot.pallets || 1,
+              weight: lot.weight,
+              volume: lot.volume,
+              needsTailLift: lot.needsTailLift,
+              vehicleId: bestV.id,
+              driverId: bestV.defaultDriverId || '',
+              status: 'Programmato',
+              anomalyNote: '',
+              externalLotId: lot.id
+            });
+            state.selectedDate = tomIso;
+            state.calendarRefDate = tomIso;
+            state.currentStep = 1;
+            saveState();
+            showToast('Rientro prenotato per domani (' + formatDateIt(tomIso) + ') su ' + bestV.name + '.');
+            renderApp();
+          }
+        } else if (action === 'close-day-next') {
+          state.closedDays[state.selectedDate] = true;
+          var nDt = parseIso(state.selectedDate);
+          nDt.setDate(nDt.getDate() + 1);
+          var nIso = toIso(nDt);
+          state.selectedDate = nIso;
+          state.calendarRefDate = nIso;
+          state.currentStep = 1;
+          saveState();
+          showToast('Giornata chiusa! Aperta programmazione del ' + formatDateIt(nIso) + '.');
+          renderApp();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (action === 'reopen-day') {
+          delete state.closedDays[state.selectedDate];
+          saveState();
+          showToast('Giornata riaperta.');
+          renderApp();
+        } else if (action === 'print-report') {
+          window.print();
+        } else if (action === 'open-fleet-modal') {
+          state.fleetModalTab = 'fleet';
+          renderFleetModal();
+          document.getElementById('modal-fleet').classList.remove('hidden');
+        } else if (action === 'close-fleet-modal') {
+          document.getElementById('modal-fleet').classList.add('hidden');
+        } else if (action === 'switch-fleet-tab') {
+          state.fleetModalTab = target.getAttribute('data-tab') || 'fleet';
+          renderFleetModal();
+        } else if (action === 'delete-vehicle') {
+          var delVehId = target.getAttribute('data-id');
+          if (state.vehicles.length <= 1) {
+            showToast('Deve rimanere almeno 1 mezzo nella flotta.', 'warning');
+            return;
+          }
+          var inUse = state.trips.some(function (t) { return t.vehicleId === delVehId; });
+          if (inUse) {
+            showToast('Impossibile eliminare: il mezzo ha viaggi assegnati.', 'error');
+            return;
+          }
+          state.vehicles = state.vehicles.filter(function (v) { return v.id !== delVehId; });
+          saveState();
+          renderFleetModal();
+          renderApp();
+          showToast('Mezzo rimosso dalla flotta.');
+        } else if (action === 'delete-driver') {
+          var delDrvId = target.getAttribute('data-id');
+          state.drivers = state.drivers.filter(function (d) { return d.id !== delDrvId; });
+          state.vehicles.forEach(function (v) {
+            if (v.defaultDriverId === delDrvId) v.defaultDriverId = '';
+          });
+          state.trips.forEach(function (t) {
+            if (t.driverId === delDrvId) t.driverId = '';
+          });
+          saveState();
+          renderFleetModal();
+          renderApp();
+          showToast('Autista rimosso.');
+        } else if (action === 'reset-all-blank') {
+          state = createBlankState();
+          saveState();
+          document.getElementById('modal-fleet').classList.add('hidden');
+          showToast('App azzerata allo stato iniziale completamente vuoto.');
+          renderApp();
+        } else if (action === 'open-brand-modal') {
+          openBrandModal();
+        } else if (action === 'close-brand-modal') {
+          closeBrandModal();
+        } else if (action === 'select-preset-icon') {
+          if (brandDraft) {
+            brandDraft.logoType = 'preset';
+            brandDraft.presetId = target.getAttribute('data-id') || 'truck';
+            brandDraft.logoDataUrl = '';
+            brandDraft.logoUrl = '';
+            document.getElementById('fb-url').value = '';
+            renderBrandModalControls();
+            applyBranding(brandDraft);
+          }
+        } else if (action === 'clear-brand-logo') {
+          if (brandDraft) {
+            brandDraft.logoType = 'preset';
+            brandDraft.presetId = 'truck';
+            brandDraft.logoDataUrl = '';
+            brandDraft.logoUrl = '';
+            document.getElementById('fb-url').value = '';
+            document.getElementById('fb-file').value = '';
+            renderBrandModalControls();
+            applyBranding(brandDraft);
+          }
+        } else if (action === 'select-palette') {
+          var pId = target.getAttribute('data-id');
+          var pal = PALETTES.find(function (p) { return p.id === pId; });
+          if (pal && brandDraft) {
+            brandDraft.paletteId = pal.id;
+            brandDraft.primary = pal.primary;
+            brandDraft.accent = pal.accent;
+            brandDraft.bgApp = pal.bgApp;
+            document.getElementById('fb-c-primary').value = pal.primary;
+            document.getElementById('fb-c-accent').value = pal.accent;
+            document.getElementById('fb-c-bg').value = pal.bgApp;
+            renderBrandModalControls();
+            applyBranding(brandDraft);
+          }
+        } else if (action === 'reset-brand-defaults') {
+          if (brandDraft) {
+            brandDraft = Object.assign({}, DEFAULT_BRAND);
+            document.getElementById('fb-name').value = brandDraft.appName;
+            document.getElementById('fb-sub').value = '';
+            document.getElementById('fb-depot').value = '';
+            document.getElementById('fb-url').value = '';
+            document.getElementById('fb-file').value = '';
+            document.getElementById('fb-c-primary').value = brandDraft.primary;
+            document.getElementById('fb-c-accent').value = brandDraft.accent;
+            document.getElementById('fb-c-bg').value = brandDraft.bgApp;
+            renderBrandModalControls();
+            applyBranding(brandDraft);
+          }
+        }
+      });
+
+      document.addEventListener('change', function (e) {
+        var el = e.target;
+
+        if (el.id === 'header-date-picker' && el.value) {
+          state.selectedDate = el.value;
+          state.calendarRefDate = el.value;
+          saveState();
+          renderApp();
+        }
+
+        if (el.id === 'ft-company-preset') {
+          var compId = el.value;
+          var comp = state.companies.find(function (c) { return c.id === compId; });
+          if (comp) {
+            applyCompanyToTripForm(comp);
+            validateTripForm();
+          }
+        }
+
+        if (el.hasAttribute('data-inline')) {
+          var field = el.getAttribute('data-inline');
+          var tId = el.getAttribute('data-id');
+          var trip = state.trips.find(function (t) { return t.id === tId; });
+          if (!trip || isDayClosed(state.selectedDate)) return;
+
+          if (field === 'vehicleId') {
+            var v = getVehicle(el.value);
+            if (trip.needsTailLift && !v.tailLift) {
+              showToast('Attenzione: questo carico richiede sponda idraulica.', 'warning');
+            }
+            trip.vehicleId = v.id;
+            if (v.defaultDriverId) trip.driverId = v.defaultDriverId;
+            showToast('Assegnato a ' + v.name + '.');
+          } else if (field === 'driverId') {
+            var drv = getDriver(el.value);
+            var targetVeh = getVehicle(trip.vehicleId);
+            if (targetVeh.requiredLicense === 'C' && drv && drv.license !== 'C') {
+              var cDrv = getFirstCDriver();
+              showToast('Blocco Patente: ' + drv.name + ' ha Patente B. Solo un autista con Patente C + CQC' +
+                (cDrv ? (' (' + cDrv.name + ')') : '') + ' può guidare ' + targetVeh.name + '.', 'error');
+              renderApp();
+              return;
+            }
+            trip.driverId = el.value;
+            showToast(drv ? ('Autista aggiornato: ' + drv.name + '.') : 'Autista rimosso dal viaggio.');
+          } else {
+            trip[field] = el.value;
+          }
+          saveState();
+          renderApp();
+        }
+
+        if (el.hasAttribute('data-veh-field')) {
+          var vField = el.getAttribute('data-veh-field');
+          var vId = el.getAttribute('data-id');
+          var vObj = getVehicle(vId);
+          if (!vObj) return;
+
+          if (vField === 'tailLift') {
+            vObj.tailLift = el.checked;
+          } else if (vField === 'requiredLicense') {
+            vObj.requiredLicense = el.value === 'C' ? 'C' : 'B';
+            if (vObj.requiredLicense === 'C' && vObj.defaultDriverId) {
+              var assignedD = getDriver(vObj.defaultDriverId);
+              if (assignedD && assignedD.license !== 'C') {
+                vObj.defaultDriverId = '';
+                showToast('Autista titolare scollegato perché richiede Patente C + CQC.', 'warning');
+              }
+            }
+          } else if (vField === 'colorKey') {
+            vObj.colorKey = VEHICLE_COLORS[el.value] ? el.value : 'sky';
+          }
+          saveState();
+          renderFleetModal();
+          renderApp();
+        }
+
+        if (el.hasAttribute('data-veh-driver')) {
+          var vdId = el.getAttribute('data-veh-driver');
+          var vdObj = getVehicle(vdId);
+          var dObj = getDriver(el.value);
+          if (vdObj.requiredLicense === 'C' && dObj && dObj.license !== 'C') {
+            var cObj = getFirstCDriver();
+            showToast('Blocco Patente: ' + dObj.name + ' ha Patente B. Solo un autista con Patente C + CQC' +
+              (cObj ? (' (' + cObj.name + ')') : '') + ' può guidare ' + vdObj.name + '.', 'error');
+            renderFleetModal();
+            return;
+          }
+          vdObj.defaultDriverId = dObj ? dObj.id : '';
+          saveState();
+          showToast(dObj ? (dObj.name + ' impostato su ' + vdObj.name + '.') : ('Autista titolare rimosso da ' + vdObj.name + '.'));
+          renderFleetModal();
+          renderApp();
+        }
+
+        if (el.hasAttribute('data-driver-license')) {
+          var drvId = el.getAttribute('data-driver-license');
+          var drvObj = getDriver(drvId);
+          if (drvObj) {
+            drvObj.license = el.value === 'C' ? 'C' : 'B';
+            if (drvObj.license !== 'C') {
+              state.vehicles.forEach(function (v) {
+                if (v.requiredLicense === 'C' && v.defaultDriverId === drvObj.id) {
+                  v.defaultDriverId = '';
+                }
+              });
+            }
+            saveState();
+            renderFleetModal();
+            renderApp();
+            showToast('Patente aggiornata per ' + drvObj.name + '.');
+          }
+        }
+
+        if (el.id === 'ft-type') {
+          var tVal = el.value;
+          var causeEl = document.getElementById('ft-cause');
+          var ddtEl = document.getElementById('ft-ddt');
+          var seq = String(state.trips.length + 1).padStart(3, '0');
+          if (tVal === 'Invio Conto Lavoro' || tVal === 'Rientro Conto Lavoro') {
+            causeEl.value = 'C/Lavorazione';
+            if (!document.getElementById('ft-id').value) ddtEl.value = 'DDT-CL/' + seq;
+          } else if (tVal === 'Ritiro Materiale') {
+            causeEl.value = 'Acquisto';
+            if (!document.getElementById('ft-id').value) ddtEl.value = 'DDT-FOR/' + seq;
+          } else {
+            causeEl.value = 'Reso';
+            if (!document.getElementById('ft-id').value) ddtEl.value = 'DDT-RES/' + seq;
+          }
+          validateTripForm();
+        }
+
+        if (el.id === 'ft-vehicle') {
+          if (el.value !== 'auto') {
+            var selVeh = getVehicle(el.value);
+            document.getElementById('ft-driver').value = selVeh.defaultDriverId || 'auto';
+          } else {
+            document.getElementById('ft-driver').value = 'auto';
+          }
+          validateTripForm();
+        }
+
+        if (el.id === 'ft-date' || el.id === 'ft-taillift' || el.id === 'ft-driver') {
+          validateTripForm();
+        }
+
+        if (el.id === 'fb-file' && el.files && el.files[0] && brandDraft) {
+          resizeImageToDataUrl(el.files[0], function (resizedUrl) {
+            if (!brandDraft) return;
+            brandDraft.logoType = 'custom';
+            brandDraft.logoDataUrl = resizedUrl;
+            brandDraft.logoUrl = '';
+            document.getElementById('fb-url').value = '';
+            renderBrandModalControls();
+            applyBranding(brandDraft);
+          });
+        }
+      });
+
+      document.addEventListener('input', function (e) {
+        var el = e.target;
+        if (el.id === 'ft-weight' || el.id === 'ft-volume') {
+          validateTripForm();
+        }
+        if (el.id === 'step2-search-input') {
+          state.step2Search = el.value;
+          saveState();
+          renderApp();
+          var refInput = document.getElementById('step2-search-input');
+          if (refInput) {
+            refInput.focus();
+            refInput.setSelectionRange(refInput.value.length, refInput.value.length);
+          }
+        }
+        if (el.id === 'companies-search') {
+          companySearchQuery = el.value;
+          renderCompaniesList();
+        }
+        if (el.hasAttribute('data-veh-field')) {
+          var vField = el.getAttribute('data-veh-field');
+          var vId = el.getAttribute('data-id');
+          var vObj = getVehicle(vId);
+          if (!vObj) return;
+          if (vField === 'name') {
+            var cleanV = el.value.trim();
+            if (cleanV) vObj.name = cleanV;
+          } else if (vField === 'plate') {
+            vObj.plate = el.value.toUpperCase();
+          } else if (vField === 'maxWeight') {
+            var mw = Number(el.value);
+            if (mw > 0) vObj.maxWeight = mw;
+          } else if (vField === 'maxVolume') {
+            var mv = Number(el.value);
+            if (mv > 0) vObj.maxVolume = mv;
+          }
+          saveState();
+          renderApp();
+        }
+        if (el.hasAttribute('data-driver-name')) {
+          var dNameId = el.getAttribute('data-driver-name');
+          var dObj = getDriver(dNameId);
+          var cleanD = el.value.trim();
+          if (dObj && cleanD) {
+            dObj.name = cleanD;
+            saveState();
+            renderApp();
+          }
+        }
+        if (el.id === 'closing-notes-input') {
+          state.dayNotes[state.selectedDate] = el.value;
+          saveState();
+        }
+        if (el.id === 'fb-name' && brandDraft) {
+          brandDraft.appName = el.value;
+          applyBranding(brandDraft);
+        }
+        if (el.id === 'fb-sub' && brandDraft) {
+          brandDraft.subtitle = el.value;
+          applyBranding(brandDraft);
+        }
+        if (el.id === 'fb-url' && brandDraft) {
+          var u = el.value.trim();
+          brandDraft.logoUrl = u;
+          if (u) {
+            brandDraft.logoType = 'custom';
+            brandDraft.logoDataUrl = '';
+          } else if (!brandDraft.logoDataUrl) {
+            brandDraft.logoType = 'preset';
+          }
+          renderBrandModalControls();
+          applyBranding(brandDraft);
+        }
+        if ((el.id === 'fb-c-primary' || el.id === 'fb-c-accent' || el.id === 'fb-c-bg') && brandDraft) {
+          brandDraft.paletteId = 'custom';
+          brandDraft.primary = document.getElementById('fb-c-primary').value;
+          brandDraft.accent = document.getElementById('fb-c-accent').value;
+          brandDraft.bgApp = document.getElementById('fb-c-bg').value;
+          renderBrandModalControls();
+          applyBranding(brandDraft);
+        }
+      });
+
+      document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (form.id === 'form-trip') {
+          e.preventDefault();
+          var valid = validateTripForm();
+          if (!valid) return;
+          var editId = document.getElementById('ft-id').value;
+          var dStr = document.getElementById('ft-date').value;
+          if (isDayClosed(dStr)) return;
+
+          var cName = document.getElementById('ft-company').value.trim();
+          var cAddr = document.getElementById('ft-address').value.trim();
+          var tType = document.getElementById('ft-type').value;
+
+          if (document.getElementById('ft-save-company').checked) {
+            var inferredCat = 'Terzista Conto Lavoro';
+            if (tType === 'Ritiro Materiale') inferredCat = 'Fornitore Materiale';
+            else if (tType === 'Consegna / Reso') inferredCat = 'Cliente / Destinatario';
+            upsertCompanyInBook(cName, cAddr, inferredCat, '', '');
+          }
+
+          var payload = {
+            date: dStr,
+            type: tType,
+            ddtCause: document.getElementById('ft-cause').value,
+            ddtNumber: document.getElementById('ft-ddt').value.trim() || ('DDT-' + Math.floor(100 + Math.random() * 899)),
+            companyName: cName,
+            address: cAddr,
+            description: document.getElementById('ft-desc').value.trim(),
+            pallets: Number(document.getElementById('ft-pallets').value) || 1,
+            weight: Number(document.getElementById('ft-weight').value),
+            volume: Number(document.getElementById('ft-volume').value),
+            km: Number(document.getElementById('ft-km').value) || 20,
+            needsTailLift: document.getElementById('ft-taillift').checked,
+            vehicleId: valid.veh.id,
+            driverId: valid.drv ? valid.drv.id : (valid.veh.defaultDriverId || '')
+          };
+
+          if (editId) {
+            var idx = state.trips.findIndex(function (t) { return t.id === editId; });
+            if (idx !== -1) state.trips[idx] = Object.assign({}, state.trips[idx], payload);
+            showToast('Viaggio aggiornato.');
+          } else {
+            var stopCnt = state.trips.filter(function (t) { return t.date === dStr && t.vehicleId === valid.veh.id; }).length;
+            state.trips.push(Object.assign({
+              id: 'VG-' + Math.floor(100 + Math.random() * 899),
+              stopOrder: stopCnt + 1,
+              status: 'Programmato',
+              anomalyNote: '',
+              externalLotId: null
+            }, payload));
+            showToast('Viaggio salvato su ' + valid.veh.name + '.');
+          }
+
+          state.selectedDate = dStr;
+          state.calendarRefDate = dStr;
+          saveState();
+          document.getElementById('modal-trip').classList.add('hidden');
+          renderApp();
+        } else if (form.id === 'form-company') {
+          e.preventDefault();
+          var compEditId = document.getElementById('fc-id').value;
+          var nameVal = document.getElementById('fc-name').value.trim();
+          var catVal = document.getElementById('fc-category').value;
+          var addrVal = document.getElementById('fc-address').value.trim();
+          var contVal = document.getElementById('fc-contact').value.trim();
+          var noteVal = document.getElementById('fc-notes').value.trim();
+          if (!nameVal || !addrVal) return;
+
+          if (compEditId) {
+            var existing = state.companies.find(function (c) { return c.id === compEditId; });
+            if (existing) {
+              existing.name = nameVal;
+              existing.category = catVal;
+              existing.address = addrVal;
+              existing.contact = contVal;
+              existing.notes = noteVal;
+            }
+            showToast('Azienda aggiornata in rubrica.');
+          } else {
+            state.companies.unshift({
+              id: 'AZ-' + Math.floor(100 + Math.random() * 899),
+              name: nameVal,
+              category: catVal,
+              address: addrVal,
+              contact: contVal,
+              notes: noteVal
+            });
+            showToast('Azienda memorizzata in rubrica.');
+          }
+          resetCompanyForm();
+          saveState();
+          renderCompaniesList();
+          renderHeader();
+        } else if (form.id === 'form-add-vehicle') {
+          e.preventDefault();
+          var newVehName = document.getElementById('fv-new-name').value.trim();
+          var newVehPlate = document.getElementById('fv-new-plate').value.trim().toUpperCase();
+          var newVehWeight = Number(document.getElementById('fv-new-weight').value) || 1500;
+          var newVehVol = Number(document.getElementById('fv-new-volume').value) || 10.0;
+          var newVehLic = document.getElementById('fv-new-license').value === 'C' ? 'C' : 'B';
+          var newVehLift = document.getElementById('fv-new-taillift').checked;
+          var newVehCol = document.getElementById('fv-new-color').value || 'sky';
+          if (!newVehName) return;
+
+          state.vehicles.push({
+            id: 'VEH-' + Math.floor(100 + Math.random() * 899),
+            name: newVehName,
+            plate: newVehPlate,
+            maxWeight: newVehWeight,
+            maxVolume: newVehVol,
+            tailLift: newVehLift,
+            requiredLicense: newVehLic,
+            colorKey: newVehCol,
+            defaultDriverId: ''
+          });
+          saveState();
+          renderFleetModal();
+          renderApp();
+          showToast('Mezzo "' + newVehName + '" aggiunto alla flotta.');
+        } else if (form.id === 'form-add-driver') {
+          e.preventDefault();
+          var newDrvName = document.getElementById('fd-new-name').value.trim();
+          var newDrvLic = document.getElementById('fd-new-license').value === 'C' ? 'C' : 'B';
+          if (!newDrvName) return;
+          state.drivers.push({
+            id: 'DRV-' + Math.floor(100 + Math.random() * 899),
+            name: newDrvName,
+            license: newDrvLic
+          });
+          saveState();
+          renderFleetModal();
+          renderApp();
+          showToast('Autista "' + newDrvName + '" aggiunto.');
+        } else if (form.id === 'form-anomaly') {
+          e.preventDefault();
+          var aId = document.getElementById('ma-id').value;
+          var note = document.getElementById('ma-note').value.trim();
+          var tr = state.trips.find(function (t) { return t.id === aId; });
+          if (tr) {
+            tr.status = 'Anomalia';
+            tr.anomalyNote = note;
+            saveState();
+            showToast('Anomalia salvata.', 'warning');
+          }
+          document.getElementById('modal-anomaly').classList.add('hidden');
+          renderApp();
+        } else if (form.id === 'form-brand') {
+          e.preventDefault();
+          if (brandDraft) {
+            brandDraft.appName = (document.getElementById('fb-name').value || 'LogiFleet').trim() || 'LogiFleet';
+            brandDraft.subtitle = (document.getElementById('fb-sub').value || '').trim();
+            brandDraft.depotAddress = (document.getElementById('fb-depot').value || '').trim();
+            state.brand = Object.assign({}, brandDraft);
+            brandDraft = null;
+            saveState();
+            applyBranding(state.brand);
+            document.getElementById('modal-brand').classList.add('hidden');
+            showToast('Impostazioni salvate.');
+            renderApp();
+          }
+        }
+      });
+
+      // Boot
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderApp);
+      } else {
+        renderApp();
+      }
+    })();
+  </script>
+</body>
+</html>
